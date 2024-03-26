@@ -1,0 +1,6 @@
+langchain
+pandas
+langchain_openai
+lark
+chromadb
+python-dotenv
