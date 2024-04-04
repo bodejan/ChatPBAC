@@ -12,6 +12,10 @@ Create a OpenAI account and create a API key. Add the key to the ```.env``` file
 OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
 ```
 
+## Prerequisites
+
+1. Python 3.9 or higher
+
 ## Setup
 
 ### Step 1: Create a Virtual Environment
@@ -35,7 +39,7 @@ venv\Scripts\activate
 ```
 
 ### Step 3: Install Requirements
-With the virtual environment activated, you can now install the project's dependencies. These dependencies are usually listed in a file called requirements.txt. To install them, run:
+With the virtual environment activated, you can now install the project's dependencies. These dependencies are listed in a file called requirements.txt. To install them, run:
 
 ```bash
 pip install --no-cache-dir -r requirements.txt

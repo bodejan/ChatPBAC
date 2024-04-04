@@ -1,7 +1,9 @@
 langchain
+langchain_experimental
+chromadb==0.4.14
 pandas
 langchain_openai
 lark
-chromadb
 python-dotenv
 faker
+tabulate
