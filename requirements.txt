@@ -7,3 +7,6 @@ lark
 python-dotenv
 faker
 tabulate
+huggingface_hub
+transformers
+sentence_transformers
