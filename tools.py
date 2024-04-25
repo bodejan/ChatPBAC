@@ -8,9 +8,15 @@ from langchain_community.agent_toolkits import create_sql_agent
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_community.agent_toolkits.sql.toolkit import SQLDatabaseToolkit
 from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS
+from langchain_core.prompts import (
+    ChatPromptTemplate,
+    FewShotChatMessagePromptTemplate,
+)
 
 from sql_agent import create_custom_sql_agent
 from prompt_template import create_custom_sql_agent_prompt
+from prompt import PBAC_SYSTEM, RETRIEVAL_PRE_SUFFIX
+from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS, PROMPT_SUFFIX
 
 import sqlite3
 
@@ -19,13 +25,25 @@ def example_search_tool(query: str) -> str:
     """Look up things online."""
     return "LangChain"
 
+def pbac_retrieval_prompt(db, purpose):
+    if db.dialect in SQL_PROMPTS:
+        prompt = SQL_PROMPTS[db.dialect]
+    else:
+        prompt = PROMPT
+    custom_prompt_suffix = RETRIEVAL_PRE_SUFFIX + purpose + '\n\n' + PROMPT_SUFFIX
+    prompt.template = str.replace(prompt.template, PROMPT_SUFFIX, custom_prompt_suffix)
+
+    return prompt
+
 @tool
 def sql_retrieval_chain_tool(input: str) -> str:
-    """SQL chain that writes and executes sql queries on a private database."""
+    """SQL chain that writes and executes sql queries on a private database."""  
     db_path = "sqlite:///sqlite_medical.db"
     db = SQLDatabase.from_uri(db_path)
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-    chain = create_sql_query_chain(llm, db, k=5)
+    purpose = 'Marketing'
+    prompt = pbac_retrieval_prompt(db, purpose)
+    chain = create_sql_query_chain(llm, db, k=5, prompt=prompt)
     query = chain.invoke({"question": input})
     results = db.run(query)
     response = f'Query: {query}\nResults: {results}'
@@ -49,6 +67,7 @@ def sql_retrieval_agent_as_tool_2(input: str) -> str:
     # SQL retrieval agent with advanced error handling capabilities. Added custom prompt.
     # Still does not work as intended.
     # Agent supposed to be used as standalone
+    # Retrieval chain is better.
     db_path = "sqlite:///sqlite_medical.db"
     db = SQLDatabase.from_uri(db_path)
     llm = OpenAI(temperature=0)
@@ -61,60 +80,41 @@ def sql_retrieval_agent_as_tool_2(input: str) -> str:
 
 @tool
 def pbac_prompt_classification_tool(query: str) -> str:
-    """Classifies the access purpose of the input prompt."""
+    """You must always use this tool first. This tool classifies the access purpose of the input prompt. Remeber to always use the tool before retrieving data."""
 
     pc_llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0)
+
+    pbac_examples = [
+        {"input": "Summarize the medical history of patient PAP587444 for medical purposes. Only consider the first two vists.", "output": "Care"},
+        {"input": "Get all patients that came in third of January, 2017 to process payments.", "output": "Insurance"},
+        {"input": "Analyze the medical history of patient PAP587764.", "output": "None"},
+        {"input": "How many available records do I have that can be used for research?", "output": "Research"},
+        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.", "output": "Support"},
+        {"input": "How many people were sick in Q1, 2017. For the analysis of public health trends.", "output": "Public"},
+        {"input": "I research cancer. Are there any patients I can contact for a trial program?", "output": "Trial"},
+        {"input": "I want to improve obesity therapies. Are there any patients I can contact to improve our current offering?", "output": "Product"},
+        {"input": "How many patients can I contact to promote our new drug?", "output": "Marketing"},
+    ]
+
+    example_prompt = ChatPromptTemplate.from_messages(
+        [
+            ("human", "{input}"),
+            ("ai", "{output}"),
+        ]
+    )
+    few_shot_prompt = FewShotChatMessagePromptTemplate(
+        example_prompt=example_prompt,
+        examples=pbac_examples,
+    )
+
     pc_prompt = ChatPromptTemplate.from_messages(
         [
             (
-                "system",
-                """
-                You are a helpful assistant that classifies a text input into a predefined access purpose category.
-
-                The following categories exist:
-
-                1. Clinical Care
-                Description: Facilitates ongoing patient care by providing healthcare providers with comprehensive access to patient histories, diagnoses, treatments, and contact information. This purpose supports informed clinical decisions and personalized care plans.
-                Category code: 'Care'
-
-                2. Research:
-                Description: Supports medical research by allowing access to anonymized patient data, focusing on diagnosis and treatment outcomes. Researchers can study patterns, effectiveness, and potential improvements in healthcare delivery and treatments.
-                Category code: 'Research'
-
-                3. Billing and Insurance Claims Processing:
-                Description: Enables the processing of billing and insurance claims through access to patient insurance information, treatment categories, and patient identifiers. This purpose assists in verifying coverage and submitting claims to insurance providers.
-                Category code: 'Insurance'
-
-                4. Patient Support Services:
-                Description: Facilitates the provision of support services to patients, including appointment scheduling, follow-up arrangements, and emergency contact communication. Ensures patients receive timely care and information.
-                Category code: 'Support'
-
-                5. Public Health Monitoring and Response:
-                Description: Allows for the monitoring of public health trends and the management of health crises by analyzing aggregated data on diagnoses, treatments, and patient demographics. Supports public health initiatives and emergency response planning.
-                Category code: 'Public'
-
-                6. Clinical Trial Recruitment:
-                Description: Supports the identification and recruitment of potential clinical trial participants by matching patient diagnoses and treatments with trial eligibility criteria. Facilitates advancements in medical research and treatment development.
-                Category code: 'Trial'
-
-                7. Product Development:
-                Description: Informs the development of medical products and services by analyzing treatment outcomes, patient demographics, and health conditions. Drives innovation in healthcare solutions tailored to patient needs. Data will be shared with third parties.
-                Category code: 'Product'
-
-                8. Marketing:
-                Description: Tailors health-related marketing initiatives to patient demographics and conditions, promoting relevant healthcare services, products, and wellness programs. Aims to enhance patient engagement and healthcare outcomes.
-                Category code: 'Marketing'
-                
-                Classify the input into one of the described categories. 
-                Use the defined category code.
-                If none of the categories matches, return 'None'. 
-                Only return the category code or 'None'. 
-
-                """
+                "system", PBAC_SYSTEM
             ),
+            few_shot_prompt,
             (
-                "human", 
-                "{input}"),
+                "human", "{input}"),
         ]
     )
     chain = pc_prompt | pc_llm
@@ -134,5 +134,5 @@ queries = [
     print(pbac_prompt_classification_tool(query))
 
 
-print(sql_retrieval_agent_as_tool(queries[2]))"""
-print(sql_retrieval_chain_tool(queries[3]))
+#print(sql_retrieval_agent_as_tool(queries[2]))"""
+print(sql_retrieval_chain_tool("Find all feamale patients with cancer that I can contact for the promotion of a new drug."))

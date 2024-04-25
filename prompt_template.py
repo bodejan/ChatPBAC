@@ -11,7 +11,6 @@ def create_custom_sql_agent_prompt(table_info):
             CUSTOM_PREFIX,
             CUSTOM_METADATA_INSTRUCTIONS,
             table_info,
-            "{tools}",
             CUSTOM_FORMAT_INSTRUCTIONS,
             CUSTOM_SUFFIX,
         ]
@@ -20,3 +19,14 @@ def create_custom_sql_agent_prompt(table_info):
     prompt = PromptTemplate.from_template(template)
 
     return prompt
+
+def create_system_prompt():
+    template = "\n\n".join(
+        [
+            SYSTEM_PREFIX,
+            SYSTEM_FORMAT_INSTRUCTIONS,
+            SYSTEM_SUFFIX
+        ]
+    )
+    return template
+
