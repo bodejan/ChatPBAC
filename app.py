@@ -21,9 +21,9 @@ with gr.Blocks() as chat_app:
         chat_history.append((message, f'Identified access purposes: {access_purpose}'))
         chat_history.append((None, output))
 
-        return "", chat_history, access_purpose
+        return "", chat_history, gr.update(value=PURPOSE_NAMES[5])
 
-    msg.submit(respond, [msg, chatbot, access_purpose], [msg, chatbot])
+    msg.submit(respond, [msg, chatbot, access_purpose], [msg, chatbot, access_purpose])
 
 if __name__ == "__main__":
     chat_app.launch()
