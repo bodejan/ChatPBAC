@@ -14,7 +14,7 @@ from langchain.output_parsers import OutputFixingParser
 
 from config import PURPOSE_CODES, get_purpose_data
 
-PBAC_SYSTEM = f"""You are a helpful privacy-aware assistant that classifies a text input into a predefined access purpose category.
+PBAC_SYSTEM = f"""You are a helpful assistant that classifies a text input into a predefined access purpose category.
 
 The following categories exist:
 
@@ -22,6 +22,7 @@ The following categories exist:
 
 Classify the input into one of the described categories. 
 Use the defined category code.
+Always return your answer in a json format.
 """
 
 # @TODO change to LLM
@@ -72,7 +73,7 @@ def pbac_prompt_classification(query: str) -> str:
     return response.content
 
 class Classification(BaseModel):
-    purpose: str = Field(description="the identified access purpose", enum=PURPOSE_CODES.append('None'))
+    access_purpose: str = Field(description="the identified access purpose", enum=PURPOSE_CODES)
     confidence: float = Field(description="the confidence at which the access purpose was identified", enum=[x / 10 for x in range(1, 11)])
     justification: str = Field(description="the justification why the access purpose was identified")
 
@@ -91,15 +92,15 @@ def classification_function(user_prompt, chat_history):
 
     try:
         response = chain.invoke({"user_prompt": user_prompt})
+        if 'access_purpose' in response and response['access_purpose'] is None:
+            response = history_classification_function(chat_history)
     except OutputParserException as ope:
-        output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
-        response = output_fixing_parser.parse(ope.llm_output)
+        #output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
+        #response = output_fixing_parser.parse(ope.llm_output)
+        response = f"""{ope.llm_output}"""
     except Exception as e:
         response['error'] = "An error accurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explictly."
         response['error_msg'] = str(e)
-
-    if response.get('purpose') == 'None':
-        response = history_classification_function(chat_history)
 
     return response
 
@@ -115,23 +116,23 @@ def classification_tool(user_prompt: str, chat_history: str):
     parser = JsonOutputParser(pydantic_object=Classification)
     prompt = PromptTemplate(
         template=classification_template,
-        input_variables=["user_prompt", "chat_history"],
+        input_variables=["user_prompt"],
         partial_variables={"format_instructions": parser.get_format_instructions() + "\nDo not use quotation marks in your justification to avoid formatting errors."},
     )
 
     chain = prompt | llm | parser
 
     try:
-        response = chain.invoke({"user_prompt": user_prompt, "chat_history": chat_history})
+        response = chain.invoke({"user_prompt": user_prompt})
+        if 'access_purpose' in response and response['access_purpose'] is None:
+            response = history_classification_function(chat_history)
     except OutputParserException as ope:
-        output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
-        response = output_fixing_parser.parse(ope.llm_output)
+        print('AN OUTPUT PARSING ERROR OCCURED')
+        # Usually the llm get's it right but the output is not parsed correctly
+        response = f"""{ope.llm_output}"""
     except Exception as e:
         response['error'] = "An error accurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explictly."
         response['error_msg'] = str(e)
-
-    if response.get('purpose') == 'None':
-        response = history_classification_function(chat_history)
 
     return response
 

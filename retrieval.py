@@ -55,8 +55,8 @@ def sql_retrieval_tool(user_prompt: str, access_purpose: str, chat_history: str)
     #@TODO add access purpose check
 
     if access_purpose not in PURPOSE_CODES:
-        access_purpose = classification_function(user_prompt, chat_history)
-        access_purpose = access_purpose['purpose']
+        response = classification_function(user_prompt, chat_history)
+        access_purpose = response.get('access_purpose') if 'access_purpose' in response else None
 
     try:
         db_path = "sqlite:///sqlite_medical.db"
@@ -66,7 +66,7 @@ def sql_retrieval_tool(user_prompt: str, access_purpose: str, chat_history: str)
         chain = create_sql_query_chain(llm, db, k=5, prompt=prompt)
         query = chain.invoke({"question": user_prompt})
         results = db.run(query)
-        response = f'Query: {query}\nResults: {results}'
+        response = f'Purpose: {access_purpose}\n\nQuery: {query}\n\nResults: {results}'
     except Exception as e:
         response = f'An error occured: {str(e)}. Query: {query}'
     return response
