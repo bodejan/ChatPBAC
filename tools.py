@@ -15,7 +15,7 @@ from langchain_core.prompts import (
 
 from sql_agent import create_custom_sql_agent
 from prompt_template import create_custom_sql_agent_prompt
-from prompt import PBAC_SYSTEM, RETRIEVAL_PRE_SUFFIX
+from prompt import RETRIEVAL_PRE_SUFFIX
 from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS, PROMPT_SUFFIX
 
 import sqlite3
