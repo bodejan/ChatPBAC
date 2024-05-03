@@ -6,7 +6,7 @@ from langchain_community.utilities import SQLDatabase
 from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS
 from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS, PROMPT_SUFFIX
 
-from classification import pbac_prompt_classification_llm
+from classification import classification_function
 from config import PURPOSE_CODES
 
 RETRIEVAL_PRE_SUFFIX = """You must always filter the query results to only include data where "Intended Purpose" contains: """
@@ -28,7 +28,7 @@ class RetrievalChainInput(BaseModel):
 @tool(args_schema=RetrievalChainInput)
 def sql_retrieval_chain_tool(user_prompt: str) -> str:
     """SQL chain that writes and executes sql queries on a private database. The tool takes the original input and relevant instructions as context."""  
-    pbac_prompt_classification_response = pbac_prompt_classification_llm(user_prompt)
+    pbac_prompt_classification_response = classification_function(user_prompt)
     if pbac_prompt_classification_response.get('error'):
         return pbac_prompt_classification_response
     if pbac_prompt_classification_response.get('purpose') == 'None':
@@ -47,14 +47,15 @@ def sql_retrieval_chain_tool(user_prompt: str) -> str:
 class RetrievalToolInput(BaseModel):
     user_prompt: str = Field(description="the original user prompt")
     access_purpose: str = Field(description="the access purpose of the retrieval request")
+    chat_history: str = Field(description="the chat history")
 
 @tool(args_schema=RetrievalToolInput)
-def sql_retrieval_tool(user_prompt: str, access_purpose: str) -> str:
+def sql_retrieval_tool(user_prompt: str, access_purpose: str, chat_history: str) -> str:
     """SQL chain that writes and executes sql queries on a private database. The tool takes the original user input and the access purpose as arguments. Always identify the access purposes using pbac_prompt_classification_tool before calling this tool."""  
     #@TODO add access purpose check
 
     if access_purpose not in PURPOSE_CODES:
-        access_purpose = pbac_prompt_classification_llm(user_prompt)
+        access_purpose = classification_function(user_prompt, chat_history)
         access_purpose = access_purpose['purpose']
 
     try:

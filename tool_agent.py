@@ -6,45 +6,47 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain.memory import ChatMessageHistory
 
 from retrieval import sql_retrieval_chain_tool, sql_retrieval_tool
-from classification import pbac_input_classification_tool
-from prompt_template import create_system_prompt
+from classification import classification_tool
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
-tools = [TavilySearchResults(max_results=5), sql_retrieval_tool, pbac_input_classification_tool]
-memory = ChatMessageHistory(session_id="session-id-placeholder")
-system_prompt = create_system_prompt()
+def init_agent():
+    llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
+    tools = [TavilySearchResults(max_results=5), sql_retrieval_tool, classification_tool]
+    memory = ChatMessageHistory(session_id="session-id-placeholder")
 
-prompt = ChatPromptTemplate.from_messages(
-    [
-        (
-            "system", "You are a helpful privacy-aware assistant. You have access to the following tools: sql_retrieval_tool, pbac_prompt_classification_tool. Always use the pbac_prompt_classification_tool before the sql_retrieval_tool.",
-        ),
-        ("placeholder", "{chat_history}"),
-        ("human", "{input}"),
-        ("placeholder", "{agent_scratchpad}"),
-    ]
-)
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system", "You are a helpful privacy-aware assistant. You have access to the following tools: sql_retrieval_tool, pbac_prompt_classification_tool. Always use the pbac_prompt_classification_tool before the sql_retrieval_tool.",
+            ),
+            ("placeholder", "{chat_history}"),
+            ("human", "{input}"),
+            ("placeholder", "{agent_scratchpad}"),
+        ]
+    )
 
-# Construct the Tools agent
-agent = create_tool_calling_agent(llm, tools, prompt)
+    # Construct the Tools agent
+    agent = create_tool_calling_agent(llm, tools, prompt)
 
-# Create an agent executor by passing in the agent and tools
-agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+    # Create an agent executor by passing in the agent and tools
+    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
 
-agent_with_chat_history = RunnableWithMessageHistory(
-    agent_executor,
-    # This is needed because in most real world scenarios, a session id is needed
-    # It isn't really used here because we are using a simple in memory ChatMessageHistory
-    lambda session_id: memory,
-    input_messages_key="input",
-    history_messages_key="chat_history",
-)
+    agent_with_chat_history = RunnableWithMessageHistory(
+        agent_executor,
+        # This is needed because in most real world scenarios, a session id is needed
+        # It isn't really used here because we are using a simple in memory ChatMessageHistory
+        lambda session_id: memory,
+        input_messages_key="input",
+        history_messages_key="chat_history",
+    )
 
-def test_agent_with_history():
+    return agent_with_chat_history
+
+
+def test_agent_with_history(agent_with_chat_history):
     response = agent_with_chat_history.invoke(
         {"input": "Find all feamale patients with cancer that I can contact for the promotion of a new drug."},
         config={"configurable": {"session_id": "<foo>"}},
@@ -64,4 +66,5 @@ def test_agent_with_history():
     print(response, '\n---------------------')
 
 if __name__ == '__main__':
-    test_agent_with_history()
+    agent_with_chat_history = init_agent()
+    test_agent_with_history(agent_with_chat_history)

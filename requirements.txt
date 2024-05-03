@@ -10,3 +10,4 @@ tabulate
 huggingface_hub
 transformers
 sentence_transformers
+gradio

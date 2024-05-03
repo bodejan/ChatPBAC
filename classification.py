@@ -12,13 +12,13 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain.output_parsers import OutputFixingParser
 
-from config import PURPOSE_CODES, get_example_purposes
+from config import PURPOSE_CODES, get_purpose_data
 
 PBAC_SYSTEM = f"""You are a helpful privacy-aware assistant that classifies a text input into a predefined access purpose category.
 
 The following categories exist:
 
-{get_example_purposes()}
+{get_purpose_data()}
 
 Classify the input into one of the described categories. 
 Use the defined category code.
@@ -76,7 +76,7 @@ class Classification(BaseModel):
     confidence: float = Field(description="the confidence at which the access purpose was identified", enum=[x / 10 for x in range(1, 11)])
     justification: str = Field(description="the justification why the access purpose was identified")
 
-def pbac_prompt_classification_llm(user_prompt):
+def classification_function(user_prompt, chat_history):
     """Prompt classification function."""
     classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' +'\n\nInput: {user_prompt}'
     llm = OpenAI(temperature=0.1)
@@ -98,6 +98,9 @@ def pbac_prompt_classification_llm(user_prompt):
         response['error'] = "An error accurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explictly."
         response['error_msg'] = str(e)
 
+    if response.get('purpose') == 'None':
+        response = history_classification_function(chat_history)
+
     return response
 
 class ClassificationInput(BaseModel):
@@ -105,7 +108,7 @@ class ClassificationInput(BaseModel):
     chat_history: str = Field(description="the chat history as a string")
 
 @tool(args_schema=ClassificationInput)
-def pbac_input_classification_tool(user_prompt: str, chat_history: str):
+def classification_tool(user_prompt: str, chat_history: str):
     """Prompt classification tool. Always use this tool before information retrieval. This tool classifies the access purposes of the user."""
     classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' +'\n\nInput: {user_prompt}'
     llm = OpenAI(temperature=0.1)
@@ -128,13 +131,12 @@ def pbac_input_classification_tool(user_prompt: str, chat_history: str):
         response['error_msg'] = str(e)
 
     if response.get('purpose') == 'None':
-        response = pbac_history_classification_tool(chat_history)
+        response = history_classification_function(chat_history)
 
     return response
 
-def pbac_history_classification_tool(chat_history: str):
-    """History classification tool."""
-    # LLM is 'confused' by the chat history even, if the purposes is stated specifically
+def history_classification_function(chat_history: str):
+    """History classification function."""
     classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' +'\n\Input: {chat_history}'
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
