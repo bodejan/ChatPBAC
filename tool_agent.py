@@ -12,9 +12,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
 def init_agent():
     llm = ChatOpenAI(model="gpt-3.5-turbo-0125")
-    tools = [TavilySearchResults(max_results=5), sql_retrieval_tool, classification_tool]
+    tools = [TavilySearchResults(max_results=5),
+             sql_retrieval_tool, classification_tool]
     memory = ChatMessageHistory(session_id="session-id-placeholder")
 
     prompt = ChatPromptTemplate.from_messages(
@@ -32,7 +34,8 @@ def init_agent():
     agent = create_tool_calling_agent(llm, tools, prompt)
 
     # Create an agent executor by passing in the agent and tools
-    agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, return_intermediate_steps=True)
+    agent_executor = AgentExecutor(
+        agent=agent, tools=tools, verbose=True, return_intermediate_steps=True)
 
     agent_with_chat_history = RunnableWithMessageHistory(
         agent_executor,
@@ -64,6 +67,7 @@ def test_agent_with_history(agent_with_chat_history):
         config={"configurable": {"session_id": "<foo>"}},
     )
     print(response, '\n---------------------')
+
 
 if __name__ == '__main__':
     agent_with_chat_history = init_agent()

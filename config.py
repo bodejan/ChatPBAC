@@ -1,8 +1,7 @@
 import logging
-import logging
 
-PURPOSE_NAMES =[
-    "Clinical Care", 
+PURPOSE_NAMES = [
+    "Clinical Care",
     "Research",
     "Billing and Insurance Claims Processing",
     "Patient Support Services",
@@ -10,10 +9,10 @@ PURPOSE_NAMES =[
     "Clinical Trial Recruitment",
     "Product Development",
     "Marketing",
-    "None", # do not delete this
+    "None",  # do not delete this
 ]
-    
-PURPOSE_DESCRIPTIONS =[
+
+PURPOSE_DESCRIPTIONS = [
     "Facilitates ongoing patient care by providing healthcare providers with comprehensive access to patient histories, diagnoses, treatments, and contact information. This purpose supports informed clinical decisions and personalized care plans.",
     "Supports medical research by allowing access to anonymized patient data, focusing on diagnosis and treatment outcomes. Researchers can study patterns, effectiveness, and potential improvements in healthcare delivery and treatments.",
     "Enables the processing of billing and insurance claims through access to patient insurance information, treatment categories, and patient identifiers. This purpose assists in verifying coverage and submitting claims to insurance providers.",
@@ -26,13 +25,13 @@ PURPOSE_DESCRIPTIONS =[
 ]
 
 PURPOSE_CODES = [
-    'Care', 
-    'Research', 
-    'Insurance', 
-    'Support', 
-    'Public', 
+    'Care',
+    'Research',
+    'Insurance',
+    'Support',
+    'Public',
     'Trial',
-    'Product', 
+    'Product',
     'Marketing',
     'None'
 ]
@@ -49,10 +48,14 @@ PURPOSE_EXAMPLES = [
     "And how many?"
 ]
 
+
 def get_purpose_data():
     summary = ''
     for name, description, code, example in zip(PURPOSE_NAMES, PURPOSE_DESCRIPTIONS, PURPOSE_CODES, PURPOSE_EXAMPLES):
-        summary += f'name: {name}\ndescription: {description}\ncode: {code}\nexample: {example}\n\n'
+        summary += f'name: {name}\ndescription: {
+            description}\ncode: {code}\nexample: {example}\n\n'
     return summary
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')

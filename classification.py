@@ -24,11 +24,12 @@ The following categories exist:
 
 {get_purpose_data()}
 
-Classify the input into one of the described categories. 
+Classify the input into one of the described categories.
 Use the defined category code.
 Always return your answer in a json format.
 Remember to only return a json string.
 """
+
 
 def filter_json(input: str) -> str:
     """
@@ -50,16 +51,17 @@ def filter_json(input: str) -> str:
     start_index = input.find('{')
     if start_index == -1:
         return input
-    
+
     # Find the index of the last closing bracket
     end_index = input.rfind('}')
     if end_index == -1:
         return input
-    
+
     # Extract the JSON object between the first opening bracket and the last closing bracket
     json_string = input[start_index:end_index+1]
-    
+
     return json_string
+
 
 def validate_access_purpose(input):
     """
@@ -105,23 +107,27 @@ def validate_access_purpose(input):
 
     return True
 
-# @TODO change to LLM
+
 @DeprecationWarning
 def pbac_prompt_classification(query: str) -> str:
     """You must always use this tool first. This tool classifies the access purpose of the input prompt. Remeber to always use the tool before retrieving data."""
-
+    # @TODO change to LLM
     pc_llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
 
     pbac_examples = [
         {"input": "Summarize the medical history of patient PAP587444 for medical purposes. Only consider the first two vists.", "output": "Care"},
-        {"input": "Get all patients that came in third of January, 2017 to process payments.", "output": "Insurance"},
+        {"input": "Get all patients that came in third of January, 2017 to process payments.",
+            "output": "Insurance"},
         {"input": "Analyze the medical history of patient PAP587764.", "output": "None"},
-        {"input": "How many available records do I have that can be used for research?", "output": "Research"},
-        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.", "output": "Support"},
+        {"input": "How many available records do I have that can be used for research?",
+            "output": "Research"},
+        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.",
+            "output": "Support"},
         {"input": "How many people were sick in Q1, 2017. For the analysis of public health trends.", "output": "Public"},
         {"input": "I research cancer. Are there any patients I can contact for a trial program?", "output": "Trial"},
         {"input": "I want to improve obesity therapies. Are there any patients I can contact to improve our current offering?", "output": "Product"},
-        {"input": "How many patients can I contact to promote our new drug?", "output": "Marketing"},
+        {"input": "How many patients can I contact to promote our new drug?",
+            "output": "Marketing"},
     ]
 
     example_prompt = ChatPromptTemplate.from_messages(
@@ -152,20 +158,27 @@ def pbac_prompt_classification(query: str) -> str:
 
     return response.content
 
+
 class Classification(BaseModel):
-    access_purpose: str = Field(description="the identified access purpose", enum=PURPOSE_CODES)
-    confidence: float = Field(description="the confidence at which the access purpose was identified", enum=[x / 10 for x in range(1, 11)])
-    justification: str = Field(description="the justification why the access purpose was identified")
+    access_purpose: str = Field(
+        description="the identified access purpose", enum=PURPOSE_CODES)
+    confidence: float = Field(description="the confidence at which the access purpose was identified", enum=[
+                              x / 10 for x in range(1, 11)])
+    justification: str = Field(
+        description="the justification why the access purpose was identified")
+
 
 def classification_function(user_prompt, chat_history):
     """Prompt classification function."""
-    classification_template = PBAC_SYSTEM + """\n\n{format_instructions}""" +"""\n\nInput: {user_prompt}"""
+    classification_template = PBAC_SYSTEM + \
+        """\n\n{format_instructions}""" + """\n\nInput: {user_prompt}"""
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
     prompt = PromptTemplate(
         template=classification_template,
         input_variables=["user_prompt"],
-        partial_variables={"format_instructions": parser.get_format_instructions() + "\nDo not use quotation marks in your justification to avoid json formatting errors."},
+        partial_variables={"format_instructions": parser.get_format_instructions(
+        ) + "\nDo not use quotation marks in your justification to avoid json formatting errors."},
     )
 
     chain = prompt | llm | filter_json | parser
@@ -173,14 +186,16 @@ def classification_function(user_prompt, chat_history):
     try:
         response = chain.invoke({"user_prompt": user_prompt})
         if 'access_purpose' in response and response['access_purpose'] == 'None':
-            logger.info('No purpose in prompt identified... Trying chat history.')
+            logger.info(
+                'No purpose in prompt identified... Trying chat history.')
             response = history_classification_function(chat_history)
 
             if not validate_access_purpose(response):
                 raise OutputParserException(llm_output=response)
 
     except OutputParserException as ope:
-        output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
+        output_fixing_parser = OutputFixingParser.from_llm(
+            parser=parser, llm=llm)
         response = output_fixing_parser.parse(ope.llm_output)
         if not validate_access_purpose(response):
             raise Exception
@@ -192,9 +207,11 @@ def classification_function(user_prompt, chat_history):
 
     return response
 
+
 class ClassificationInput(BaseModel):
     user_prompt: str = Field(description="the original user prompt")
     chat_history: str = Field(description="the chat history as a string")
+
 
 @tool(args_schema=ClassificationInput)
 def classification_tool(user_prompt: str, chat_history: str):
@@ -203,15 +220,18 @@ def classification_tool(user_prompt: str, chat_history: str):
 
     return response
 
+
 def history_classification_function(chat_history: str):
     """History classification function."""
-    classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' + '\n\Input: {chat_history}'
+    classification_template = PBAC_SYSTEM + \
+        '\n\n{format_instructions}' + '\n\Input: {chat_history}'
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
     prompt = PromptTemplate(
         template=classification_template,
         input_variables=["chat_history"],
-        partial_variables={"format_instructions": parser.get_format_instructions() + "\nDo not use quotation marks in your justification to avoid formatting errors."},
+        partial_variables={"format_instructions": parser.get_format_instructions(
+        ) + "\nDo not use quotation marks in your justification to avoid formatting errors."},
     )
 
     chain = prompt | llm | filter_json | parser
@@ -219,7 +239,8 @@ def history_classification_function(chat_history: str):
     try:
         response = chain.invoke({"chat_history": chat_history})
     except OutputParserException as ope:
-        output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
+        output_fixing_parser = OutputFixingParser.from_llm(
+            parser=parser, llm=llm)
         response = output_fixing_parser.parse(ope.llm_output)
     except Exception as e:
         response = {}

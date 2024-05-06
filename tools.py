@@ -20,10 +20,12 @@ from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS, PROMPT_SUF
 
 import sqlite3
 
+
 @tool
 def example_search_tool(query: str) -> str:
     """Look up things online."""
     return "LangChain"
+
 
 def pbac_retrieval_prompt(db, purpose):
     if db.dialect in SQL_PROMPTS:
@@ -31,13 +33,15 @@ def pbac_retrieval_prompt(db, purpose):
     else:
         prompt = PROMPT
     custom_prompt_suffix = RETRIEVAL_PRE_SUFFIX + purpose + '\n\n' + PROMPT_SUFFIX
-    prompt.template = str.replace(prompt.template, PROMPT_SUFFIX, custom_prompt_suffix)
+    prompt.template = str.replace(
+        prompt.template, PROMPT_SUFFIX, custom_prompt_suffix)
 
     return prompt
 
+
 @tool
 def sql_retrieval_chain_tool(input: str) -> str:
-    """SQL chain that writes and executes sql queries on a private database."""  
+    """SQL chain that writes and executes sql queries on a private database."""
     db_path = "sqlite:///sqlite_medical.db"
     db = SQLDatabase.from_uri(db_path)
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
@@ -48,6 +52,7 @@ def sql_retrieval_chain_tool(input: str) -> str:
     results = db.run(query)
     response = f'Query: {query}\nResults: {results}'
     return response
+
 
 @tool
 def sql_retrieval_agent_as_tool(input: str) -> str:
@@ -60,6 +65,7 @@ def sql_retrieval_agent_as_tool(input: str) -> str:
     response = agent_executor.invoke(input)
 
     return response
+
 
 @tool
 def sql_retrieval_agent_as_tool_2(input: str) -> str:
@@ -86,14 +92,18 @@ def pbac_prompt_classification_tool(query: str) -> str:
 
     pbac_examples = [
         {"input": "Summarize the medical history of patient PAP587444 for medical purposes. Only consider the first two vists.", "output": "Care"},
-        {"input": "Get all patients that came in third of January, 2017 to process payments.", "output": "Insurance"},
+        {"input": "Get all patients that came in third of January, 2017 to process payments.",
+            "output": "Insurance"},
         {"input": "Analyze the medical history of patient PAP587764.", "output": "None"},
-        {"input": "How many available records do I have that can be used for research?", "output": "Research"},
-        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.", "output": "Support"},
+        {"input": "How many available records do I have that can be used for research?",
+            "output": "Research"},
+        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.",
+            "output": "Support"},
         {"input": "How many people were sick in Q1, 2017. For the analysis of public health trends.", "output": "Public"},
         {"input": "I research cancer. Are there any patients I can contact for a trial program?", "output": "Trial"},
         {"input": "I want to improve obesity therapies. Are there any patients I can contact to improve our current offering?", "output": "Product"},
-        {"input": "How many patients can I contact to promote our new drug?", "output": "Marketing"},
+        {"input": "How many patients can I contact to promote our new drug?",
+            "output": "Marketing"},
     ]
 
     example_prompt = ChatPromptTemplate.from_messages(
@@ -119,9 +129,10 @@ def pbac_prompt_classification_tool(query: str) -> str:
     )
     chain = pc_prompt | pc_llm
     response = chain.invoke(query)
-    #print(f"'{query}' classified as '{response.content}'.")
+    # print(f"'{query}' classified as '{response.content}'.")
 
     return response.content
+
 
 queries = [
     "Summarize the medical history of patient PAP587444 for medical purposes. Only consider the first two vists.",
@@ -135,4 +146,5 @@ queries = [
 
 
 #print(sql_retrieval_agent_as_tool(queries[2]))"""
-print(sql_retrieval_chain_tool("Find all feamale patients with cancer that I can contact for the promotion of a new drug."))
+print(sql_retrieval_chain_tool(
+    "Find all feamale patients with cancer that I can contact for the promotion of a new drug."))
