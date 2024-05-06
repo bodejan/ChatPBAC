@@ -1,3 +1,5 @@
+import logging
+
 PURPOSE_NAMES =[
     "Clinical Care", 
     "Research",
@@ -7,7 +9,7 @@ PURPOSE_NAMES =[
     "Clinical Trial Recruitment",
     "Product Development",
     "Marketing",
-    "None" # do not delete this
+    "None", # do not delete this
 ]
     
 PURPOSE_DESCRIPTIONS =[
@@ -51,3 +53,5 @@ def get_purpose_data():
     for name, description, code, example in zip(PURPOSE_NAMES, PURPOSE_DESCRIPTIONS, PURPOSE_CODES, PURPOSE_EXAMPLES):
         summary += f'name: {name}\ndescription: {description}\ncode: {code}\nexample: {example}\n\n'
     return summary
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

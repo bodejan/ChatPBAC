@@ -15,10 +15,10 @@ with gr.Blocks() as chat_app:
 
     def respond(message, chat_history, access_purpose):
         classification_response = classification_function(message, chat_history)
-        response = llm.invoke(
+        """ response = llm.invoke(
             {"input": message},
             config={"configurable": {"session_id": "<foo>"}}
-        )
+        ) """
         response = {}
         response['output'] = 'Hi'
         #print(response.get('intermediate_steps'))

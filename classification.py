@@ -14,6 +14,10 @@ from langchain.output_parsers import OutputFixingParser
 
 from config import PURPOSE_CODES, get_purpose_data
 
+import logging
+
+logger = logging.getLogger()
+
 PBAC_SYSTEM = f"""You are a helpful assistant that classifies a text input into a predefined access purpose category.
 
 The following categories exist:
@@ -86,7 +90,6 @@ def validate_access_purpose(input):
         >>> validate_dict(input_dict3)
         False
     """
-    print(input)
     # Check if input is a dictionary
     if not isinstance(input, dict):
         return False
@@ -156,7 +159,7 @@ class Classification(BaseModel):
 
 def classification_function(user_prompt, chat_history):
     """Prompt classification function."""
-    classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' +'\n\nInput: {user_prompt}'
+    classification_template = PBAC_SYSTEM + """\n\n{format_instructions}""" +"""\n\nInput: {user_prompt}"""
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
     prompt = PromptTemplate(
@@ -169,7 +172,8 @@ def classification_function(user_prompt, chat_history):
 
     try:
         response = chain.invoke({"user_prompt": user_prompt})
-        if 'access_purpose' in response and response['access_purpose'] is None:
+        if 'access_purpose' in response and response['access_purpose'] == 'None':
+            logger.info('No purpose in prompt identified... Trying chat history.')
             response = history_classification_function(chat_history)
 
             if not validate_access_purpose(response):
@@ -179,14 +183,12 @@ def classification_function(user_prompt, chat_history):
         output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
         response = output_fixing_parser.parse(ope.llm_output)
         if not validate_access_purpose(response):
-                raise Exception
+            raise Exception
     except Exception as e:
         response = {}
-        response['access_purpose'] = "Error"
+        response['access_purpose'] = "None"
         response['justification'] = "An error occurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explicitly."
         response['error_msg'] = str(e)
-
-
 
     return response
 
@@ -203,7 +205,7 @@ def classification_tool(user_prompt: str, chat_history: str):
 
 def history_classification_function(chat_history: str):
     """History classification function."""
-    classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' +'\n\Input: {chat_history}'
+    classification_template = PBAC_SYSTEM + '\n\n{format_instructions}' + '\n\Input: {chat_history}'
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
     prompt = PromptTemplate(
@@ -220,7 +222,8 @@ def history_classification_function(chat_history: str):
         output_fixing_parser = OutputFixingParser.from_llm(parser=parser, llm=llm)
         response = output_fixing_parser.parse(ope.llm_output)
     except Exception as e:
-        response['access_purpose'] = "Error"
+        response = {}
+        response['access_purpose'] = "None"
         response['justification'] = "An error occurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explicitly."
         response['error_msg'] = str(e)
 
