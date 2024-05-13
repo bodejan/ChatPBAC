@@ -134,11 +134,8 @@ def classification_function(user_prompt, chat_history):
 
     try:
         response = chain.invoke({"user_prompt": user_prompt})
-        if 'access_purpose' in response and response['access_purpose'] == 'None':
-            response = history_classification_function(chat_history)
-
-            if not validate_access_purpose(response):
-                raise OutputParserException(llm_output=response)
+        if not validate_access_purpose(response):
+            raise OutputParserException(llm_output=response)
 
     except OutputParserException as ope:
         output_fixing_parser = OutputFixingParser.from_llm(
@@ -168,6 +165,7 @@ def classification_tool(user_prompt: str, chat_history: str):
     return response
 
 
+@DeprecationWarning
 def history_classification_function(chat_history: str):
     """History classification function."""
     logger.info(f'No access purpose in prompt identified, analyzing chat history: {

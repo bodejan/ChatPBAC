@@ -15,7 +15,7 @@ from tool_agent import init_chatbot
 load_dotenv()
 
 
-def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list):
+def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose_name: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
     retrieval_decision = decide_retrieval(user_prompt)
     if "True" in retrieval_decision:
