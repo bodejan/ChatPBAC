@@ -11,3 +11,4 @@ huggingface_hub
 transformers
 sentence_transformers
 gradio
+flash_attn

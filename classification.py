@@ -186,8 +186,6 @@ def classification_function(user_prompt, chat_history):
     try:
         response = chain.invoke({"user_prompt": user_prompt})
         if 'access_purpose' in response and response['access_purpose'] == 'None':
-            logger.info(
-                'No purpose in prompt identified... Trying chat history.')
             response = history_classification_function(chat_history)
 
             if not validate_access_purpose(response):
@@ -223,6 +221,8 @@ def classification_tool(user_prompt: str, chat_history: str):
 
 def history_classification_function(chat_history: str):
     """History classification function."""
+    logger.info(f'No access purpose in prompt identified, analyzing chat history: {
+                chat_history}')
     classification_template = PBAC_SYSTEM + \
         '\n\n{format_instructions}' + '\n\Input: {chat_history}'
     llm = OpenAI(temperature=0.1)

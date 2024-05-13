@@ -44,3 +44,9 @@ With the virtual environment activated, you can now install the project's depend
 ```bash
 pip install --no-cache-dir -r requirements.txt
 ```
+
+### Step 4: Install Additional Requirements
+
+```bash
+pip install --upgrade-strategy eager "optimum[openvino,nncf]"
+```
