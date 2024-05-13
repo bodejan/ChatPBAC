@@ -108,57 +108,6 @@ def validate_access_purpose(input):
     return True
 
 
-@DeprecationWarning
-def pbac_prompt_classification(query: str) -> str:
-    """You must always use this tool first. This tool classifies the access purpose of the input prompt. Remeber to always use the tool before retrieving data."""
-    # @TODO change to LLM
-    pc_llm = ChatOpenAI(model="gpt-3.5-turbo-0125", temperature=0.2)
-
-    pbac_examples = [
-        {"input": "Summarize the medical history of patient PAP587444 for medical purposes. Only consider the first two vists.", "output": "Care"},
-        {"input": "Get all patients that came in third of January, 2017 to process payments.",
-            "output": "Insurance"},
-        {"input": "Analyze the medical history of patient PAP587764.", "output": "None"},
-        {"input": "How many available records do I have that can be used for research?",
-            "output": "Research"},
-        {"input": "Give me the data for patient PAP249364 to schedule a follow-up appointment.",
-            "output": "Support"},
-        {"input": "How many people were sick in Q1, 2017. For the analysis of public health trends.", "output": "Public"},
-        {"input": "I research cancer. Are there any patients I can contact for a trial program?", "output": "Trial"},
-        {"input": "I want to improve obesity therapies. Are there any patients I can contact to improve our current offering?", "output": "Product"},
-        {"input": "How many patients can I contact to promote our new drug?",
-            "output": "Marketing"},
-    ]
-
-    example_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("human", "{input}"),
-            ("ai", "{output}"),
-        ]
-    )
-    few_shot_prompt = FewShotChatMessagePromptTemplate(
-        example_prompt=example_prompt,
-        examples=pbac_examples,
-    )
-
-    pc_prompt = ChatPromptTemplate.from_messages(
-        [
-            (
-                "system", PBAC_SYSTEM
-            ),
-            few_shot_prompt,
-            (
-                "human", "{input}"),
-        ]
-    )
-    print(pc_prompt)
-    chain = pc_prompt | pc_llm
-    response = chain.invoke(query)
-    print(f"'{query}' classified as '{response.content}'.")
-
-    return response.content
-
-
 class Classification(BaseModel):
     access_purpose: str = Field(
         description="the identified access purpose", enum=PURPOSE_CODES)

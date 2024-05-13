@@ -1,5 +1,9 @@
 import logging
 
+CONTEXT = "The dataset contains detailed records of medical visits from multiple patients, including information about symptoms, diagnoses, treatments, and patient demographics. Each record also includes specific details such as the consulting physician, patient consent for treatments, emergency contacts, and the intended purposes of the medical data."
+
+DB_PATH = "sqlite:///sqlite_medical.db"
+
 PURPOSES = [
     {
         "name": "Clinical Care",
@@ -50,16 +54,16 @@ PURPOSES = [
         "example": "How many patients can I contact to promote our new drug?"
     },
     {
-        "name": "None", # do not delete this
+        "name": "None",  # do not delete this
         "description": "None of the previous purposes matches. The access purpose is not defined in the input.",
         "code": "None",
-        "example": "And how many?"}
+        "example": "And how many?"
     },
     {
         "name": "Error",
         "description": "An error occurred please retry.",
         "code": "Error",
-        "example": ""
+        "example": "",
     }
 ]
 

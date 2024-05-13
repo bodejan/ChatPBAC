@@ -7,9 +7,10 @@ from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS
 from langchain.chains.sql_database.prompt import PROMPT, SQL_PROMPTS, PROMPT_SUFFIX
 
 from classification import classification_function
-from config import PURPOSE_CODES
+from config import PURPOSE_CODES, DB_PATH
 
 RETRIEVAL_PRE_SUFFIX = """You must always filter the query results to only include data where "Intended Purpose" contains: """
+
 
 def pbac_retrieval_prompt(db, purpose):
     if db.dialect in SQL_PROMPTS:
@@ -17,17 +18,20 @@ def pbac_retrieval_prompt(db, purpose):
     else:
         prompt = PROMPT
     custom_prompt_suffix = RETRIEVAL_PRE_SUFFIX + purpose + '\n\n' + PROMPT_SUFFIX
-    prompt.template = str.replace(prompt.template, PROMPT_SUFFIX, custom_prompt_suffix)
+    prompt.template = str.replace(
+        prompt.template, PROMPT_SUFFIX, custom_prompt_suffix)
 
     return prompt
 
+
 class RetrievalChainInput(BaseModel):
     user_prompt: str = Field(description="the original user prompt")
-    #chat_history: str = Field(description="the chat history")
+    # chat_history: str = Field(description="the chat history")
+
 
 @tool(args_schema=RetrievalChainInput)
 def sql_retrieval_chain_tool(user_prompt: str) -> str:
-    """SQL chain that writes and executes sql queries on a private database. The tool takes the original input and relevant instructions as context."""  
+    """SQL chain that writes and executes sql queries on a private database. The tool takes the original input and relevant instructions as context."""
     pbac_prompt_classification_response = classification_function(user_prompt)
     if pbac_prompt_classification_response.get('error'):
         return pbac_prompt_classification_response
@@ -37,26 +41,31 @@ def sql_retrieval_chain_tool(user_prompt: str) -> str:
     db_path = "sqlite:///sqlite_medical.db"
     db = SQLDatabase.from_uri(db_path)
     llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-    user_prompt = pbac_retrieval_prompt(db, pbac_prompt_classification_response['purpose'])
+    user_prompt = pbac_retrieval_prompt(
+        db, pbac_prompt_classification_response['purpose'])
     chain = create_sql_query_chain(llm, db, k=5, prompt=user_prompt)
     query = chain.invoke({"question": user_prompt})
     results = db.run(query)
-    response = f'Prompt Classification: {pbac_prompt_classification_response}\nQuery: {query}\nResults: {results}'
+    response = f'Prompt Classification: {
+        pbac_prompt_classification_response}\nQuery: {query}\nResults: {results}'
     return response
+
 
 class RetrievalToolInput(BaseModel):
     user_prompt: str = Field(description="the original user prompt")
-    access_purpose: str = Field(description="the access purpose of the retrieval request")
+    access_purpose: str = Field(
+        description="the access purpose of the retrieval request")
     chat_history: str = Field(description="the chat history")
+
 
 @tool(args_schema=RetrievalToolInput)
 def sql_retrieval_tool(user_prompt: str, access_purpose: str, chat_history: str) -> str:
-    """SQL chain that writes and executes sql queries on a private database. The tool takes the original user input and the access purpose as arguments. Always identify the access purposes using pbac_prompt_classification_tool before calling this tool."""  
-    #@TODO add access purpose check
+    """SQL chain that writes and executes sql queries on a private database. The tool takes the original user input and the access purpose as arguments. Always identify the access purposes using pbac_prompt_classification_tool before calling this tool."""
 
     if access_purpose not in PURPOSE_CODES:
         response = classification_function(user_prompt, chat_history)
-        access_purpose = response.get('access_purpose') if 'access_purpose' in response else None
+        access_purpose = response.get(
+            'access_purpose') if 'access_purpose' in response else None
 
     try:
         db_path = "sqlite:///sqlite_medical.db"
@@ -66,10 +75,27 @@ def sql_retrieval_tool(user_prompt: str, access_purpose: str, chat_history: str)
         chain = create_sql_query_chain(llm, db, k=5, prompt=prompt)
         query = chain.invoke({"question": user_prompt})
         results = db.run(query)
-        response = f'Purpose: {access_purpose}\n\nQuery: {query}\n\nResults: {results}'
+        response = f'Purpose: {access_purpose}\n\nQuery: {
+            query}\n\nResults: {results}'
     except Exception as e:
-        response = f'An error occured: {str(e)}. Query: {query}'
+        response = f'An error occurred: {str(e)}. Query: {query}'
     return response
 
-#print(sql_retrieval_chain_tool("Find all feamale patients with cancer that I can contact for marketing a new drug."))
-#print(sql_retrieval_chain_tool("How many vists in the dataset?"))
+
+def retrieve_data(user_prompt: str, access_purpose: str):
+    if access_purpose not in PURPOSE_CODES:
+        return {'query': 'None', 'results': 'Unable to retrieve data. Please provide a valid access purpose.'}
+
+    try:
+        db = SQLDatabase.from_uri(DB_PATH)
+        llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+        prompt = pbac_retrieval_prompt(db, access_purpose)
+        chain = create_sql_query_chain(llm, db, k=5, prompt=prompt)
+        query = chain.invoke({"question": user_prompt})
+        results = db.run(query)
+        return {'query': query, 'results': results}
+    except Exception as e:
+        return {'query': query, 'results': 'An error occurred: ' + str(e)}
+
+# print(sql_retrieval_chain_tool("Find all feamale patients with cancer that I can contact for marketing a new drug."))
+# print(sql_retrieval_chain_tool("How many vists in the dataset?"))
