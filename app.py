@@ -22,7 +22,7 @@ with gr.Blocks(
     with gr.Tab(label="Access Purpose Identification"):
 
         access_purpose = gr.Dropdown(
-            choices=PURPOSE_NAMES, interactive=True, label='Data Access Purpose')
+            choices=PURPOSE_NAMES, value='None', interactive=True, label='Data Access Purpose')
 
         purpose_chatbot = gr.Chatbot(
             label="PBAC Identification Bot",
@@ -30,9 +30,6 @@ with gr.Blocks(
 
         purpose_msg = gr.Textbox(
             placeholder="Please describe your data access purpose. Alternatively, use the select-box above.")
-
-        purpose_clear = gr.ClearButton(
-            [purpose_msg, purpose_chatbot, access_purpose])
 
         def purpose_respond(message, chat_history):
             response = classification_function(message, chat_history)
@@ -46,12 +43,15 @@ with gr.Blocks(
                  'If the identification was incorrect, please provide a more detailed description of your data access purpose.')
             )
 
-            return "", chat_history, gr.update(value=PURPOSE_NAMES[access_purpose_index]), gr.update(value=PURPOSE_NAMES[access_purpose_index])
+            return "", chat_history, gr.update(value=PURPOSE_NAMES[access_purpose_index])
+
+        purpose_msg.submit(purpose_respond, [purpose_msg, purpose_chatbot],
+                           [purpose_msg, purpose_chatbot, access_purpose])
 
     with gr.Tab(label="RAG-based Chatbot"):
 
         access_purpose_mirror = gr.Dropdown(
-            choices=PURPOSE_NAMES, interactive=False, label='Data Access Purpose')
+            choices=PURPOSE_NAMES, value='None', interactive=False, label='Data Access Purpose')
 
         chatbot = gr.Chatbot(show_copy_button=True)
         msg = gr.Textbox()
@@ -85,11 +85,12 @@ with gr.Blocks(
         msg.submit(respond, [msg, chatbot, access_purpose],
                    [msg, chatbot, access_purpose])
 
-        clear = gr.ClearButton([msg, chatbot])
+    def update_mirror(access_purpose):
+        return gr.update(value=access_purpose)
 
-    # Purpose identification actions
-    purpose_msg.submit(purpose_respond, [purpose_msg, purpose_chatbot],
-                       [purpose_msg, purpose_chatbot, access_purpose, access_purpose_mirror])
+    access_purpose.change(
+        update_mirror, access_purpose, access_purpose_mirror)
+    clear = gr.ClearButton([msg, purpose_msg, chatbot, purpose_chatbot])
 
 
 if __name__ == "__main__":
