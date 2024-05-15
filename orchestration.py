@@ -19,7 +19,6 @@ logger = logging.getLogger()
 
 def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose_name: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
-    logger.info(f"Access Purpose Name: {access_purpose_name}")
     retrieval_decision = decide_retrieval(user_prompt, chat_history)
     if "True" in retrieval_decision:
         if access_purpose_name is not None:
@@ -32,7 +31,7 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         else:
             # Classify prompt
             classification_response = classification_function(
-                user_prompt, chat_history)
+                user_prompt)
             access_purpose = classification_response.get('access_purpose')
             justification = classification_response.get('justification')
             confidence = classification_response.get('confidence')

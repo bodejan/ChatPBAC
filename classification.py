@@ -117,7 +117,7 @@ class Classification(BaseModel):
         description="the justification why the access purpose was identified")
 
 
-def classification_function(user_prompt, chat_history):
+def classification_function(user_prompt):
     """Prompt classification function."""
     classification_template = PBAC_SYSTEM + \
         """\n\n{format_instructions}""" + """\n\nInput: {user_prompt}"""
@@ -150,50 +150,4 @@ def classification_function(user_prompt, chat_history):
         response['error_msg'] = str(e)
 
     logger.info(f"Classification response: {response}")
-    return response
-
-
-class ClassificationInput(BaseModel):
-    user_prompt: str = Field(description="the original user prompt")
-    chat_history: str = Field(description="the chat history as a string")
-
-
-@tool(args_schema=ClassificationInput)
-def classification_tool(user_prompt: str, chat_history: str):
-    """Prompt classification tool. Always use this tool before information retrieval. This tool classifies the access purposes of the user."""
-    response = classification_function(user_prompt, chat_history)
-
-    return response
-
-
-@DeprecationWarning
-def history_classification_function(chat_history: str):
-    """History classification function."""
-    logger.info(f'No access purpose in prompt identified, analyzing chat history: {
-                chat_history}')
-    classification_template = PBAC_SYSTEM + \
-        '\n\n{format_instructions}' + '\n\Input: {chat_history}'
-    llm = OpenAI(temperature=0.1)
-    parser = JsonOutputParser(pydantic_object=Classification)
-    prompt = PromptTemplate(
-        template=classification_template,
-        input_variables=["chat_history"],
-        partial_variables={"format_instructions": parser.get_format_instructions(
-        ) + "\nDo not use quotation marks in your justification to avoid formatting errors."},
-    )
-
-    chain = prompt | llm | filter_json | parser
-
-    try:
-        response = chain.invoke({"chat_history": chat_history})
-    except OutputParserException as ope:
-        output_fixing_parser = OutputFixingParser.from_llm(
-            parser=parser, llm=llm)
-        response = output_fixing_parser.parse(ope.llm_output)
-    except Exception as e:
-        response = {}
-        response['access_purpose'] = "None"
-        response['justification'] = "An error occurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explicitly."
-        response['error_msg'] = str(e)
-
     return response

@@ -31,7 +31,7 @@ with gr.Blocks(
             placeholder="Please describe your data access purpose. Alternatively, use the select-box above.")
 
         def purpose_respond(message, chat_history):
-            response = classification_function(message, chat_history)
+            response = classification_function(message)
             access_purpose_index = PURPOSE_CODES.index(
                 response.get('access_purpose'))
             chat_history.append(
@@ -56,17 +56,15 @@ with gr.Blocks(
         msg = gr.Textbox()
 
         def respond(message, chat_history, access_purpose):
-            response = orchestrate(message, llm, chat_history, access_purpose)
-            if response.get('access_purpose', None) is not None:
-                access_purpose_index = PURPOSE_CODES.index(
-                    response.get('access_purpose'))
-                # chat_history.append((message, f'Access purposes: {PURPOSE_NAMES[access_purpose_index]}\nJustification: {response.get(
-                #    'justification', 'Sorry, there is no justification available.')}\nConfidence: {response.get('confidence', 'Sorry, there is no confidence score available.')}'))
+            if access_purpose is None:
+                chat_history.append(
+                    (message, 'Please provide a data access purpose in the "Access Purpose Identification" tab.'))
+                return "", chat_history
+            else:
+                response = orchestrate(
+                    message, llm, chat_history, access_purpose)
                 chat_history.append(
                     (message,
-                     f'Access Purposes: {PURPOSE_NAMES[access_purpose_index]}\n' +
-                     f'Justification: {response.get("justification", "Sorry, there is no justification available.")}\n' +
-                     f'Confidence: {response.get("confidence", "Sorry, there is no confidence score available.")}\n' +
                      f'Query: {response.get(
                          "query", "Sorry, there is no query available.")}\n' +
                      f'Query Results: {response.get(
@@ -74,21 +72,18 @@ with gr.Blocks(
                      )
                 )
                 chat_history.append((None, response.get('output')))
-            else:
-                access_purpose_index = PURPOSE_CODES.index(
-                    'None')
-                chat_history.append((message, response.get('output')))
 
-            return "", chat_history, gr.update(value=PURPOSE_NAMES[access_purpose_index])
+            return "", chat_history
 
         msg.submit(respond, [msg, chatbot, access_purpose],
-                   [msg, chatbot, access_purpose])
+                   [msg, chatbot])
 
     def update_mirror(access_purpose):
         return gr.update(value=access_purpose)
 
     access_purpose.change(
         update_mirror, access_purpose, access_purpose_mirror)
+
     clear = gr.ClearButton([msg, purpose_msg, chatbot, purpose_chatbot])
 
 

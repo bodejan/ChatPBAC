@@ -55,11 +55,7 @@ pip install --upgrade-strategy eager "optimum[openvino,nncf]"
 
 # TODOs
 
-1. We only classify the access purpose once, afterwards it can be changed manually changed
 2. Fix parallel memory issues
 3. Add instructions to gradio
 4. Add configs to gradio
-5. Make it two-step: 
-    1. Identify access purpose based in used prompt
-    2. Start to chat with already defined purpose
 6. Fix purpose classification with history
