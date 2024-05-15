@@ -49,6 +49,11 @@ def init_chatbot():
     return with_message_history
 
 
+def init_naive_chat():
+    chat = ChatOpenAI()
+    return chat
+
+
 if __name__ == '__main__':
     # agent_with_chat_history = init_agent()
     # test_agent_with_history(agent_with_chat_history)

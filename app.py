@@ -1,11 +1,11 @@
-from llm import init_chatbot
+from llm import init_chatbot, init_naive_chat
 import gradio as gr
 
 from config import PURPOSE_CODES, PURPOSE_NAMES
 from classification import classification_function
 from orchestration import orchestrate
 
-llm = init_chatbot()
+llm = init_naive_chat()
 
 with gr.Blocks(
     title="PBAC-enhanced Chatbot",
@@ -63,7 +63,7 @@ with gr.Blocks(
             else:
                 response = orchestrate(
                     message, llm, chat_history, access_purpose)
-                chat_history.append(
+                """ chat_history.append(
                     (message,
                      f'Query: {response.get(
                          "query", "Sorry, there is no query available.")}\n' +
@@ -71,7 +71,9 @@ with gr.Blocks(
                          "results", "Sorry, there are no results available.")}'
                      )
                 )
-                chat_history.append((None, response.get('output')))
+                chat_history.append((None, response.get('output'))) """
+                # chat_history.append((message, response.get('output')))
+                chat_history = response.get('chat_history')
 
             return "", chat_history
 
@@ -84,7 +86,8 @@ with gr.Blocks(
     access_purpose.change(
         update_mirror, access_purpose, access_purpose_mirror)
 
-    clear = gr.ClearButton([msg, purpose_msg, chatbot, purpose_chatbot])
+    clear = gr.ClearButton(
+        [msg, purpose_msg, chatbot, purpose_chatbot, access_purpose, access_purpose_mirror])
 
 
 if __name__ == "__main__":

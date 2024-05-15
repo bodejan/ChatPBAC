@@ -5,6 +5,7 @@ from langchain_core.prompts import (
     FewShotChatMessagePromptTemplate,
     PromptTemplate
 )
+from langchain.schema import AIMessage, HumanMessage
 from dotenv import load_dotenv
 import logging
 
@@ -19,6 +20,7 @@ logger = logging.getLogger()
 
 def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose_name: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
+    logger.info(f"Gradio chat history: {chat_history}")
     retrieval_decision = decide_retrieval(user_prompt, chat_history)
     if "True" in retrieval_decision:
         if access_purpose_name is not None:
@@ -41,24 +43,66 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         query = retrieval_response.get('query')
         results = retrieval_response.get('results')
 
+        chat_history = add_function_message_and_user_prompt(
+            chat_history, query, results, user_prompt)
+        lang_chat_history = format_chat_history(chat_history, user_prompt)
+
         # Generate informed response
-        chatbot_response = chatbot.invoke(
+        """ chatbot_response = chatbot.invoke(
             {"input": user_prompt, "context": results},
             config={"configurable": {"session_id": "<foo>"}}
-        )
+        ) """
+
+        chatbot_response = chatbot.invoke(lang_chat_history)
+        chat_history = add_response_message(
+            chat_history, chatbot_response.content)
+        logger.info(f"Chatbot response: {chatbot_response}")
+
         return {'output': chatbot_response.content,
                 'query': query, 'results': results,
                 'access_purpose': access_purpose,
                 'justification': justification,
                 'confidence': confidence,
-                'metadata': chatbot_response.response_metadata}
+                'metadata': chatbot_response.response_metadata,
+                'chat_history': chat_history}
     else:
-        chatbot_response = chatbot.invoke(
-            {"input": user_prompt, "context": ''},
-            config={"configurable": {"session_id": "<foo>"}}
-        )
+        lang_chat_history = format_chat_history(chat_history, user_prompt)
+        logger.info(f"Chat history: {lang_chat_history}")
+        chatbot_response = chatbot.invoke(lang_chat_history)
+        chat_history = add_response_message_and_user_prompt(
+            chat_history, chatbot_response.content, user_prompt)
         return {'output': chatbot_response.content,
-                'metadata': chatbot_response.response_metadata}
+                'metadata': chatbot_response.response_metadata,
+                'chat_history': chat_history}
+
+
+def format_chat_history(chat_history, user_prompt):
+    history_langchain_format = []
+    for human, ai in chat_history:
+        if human is None:
+            human = ""
+        history_langchain_format.append(HumanMessage(content=human))
+        history_langchain_format.append(AIMessage(content=ai))
+    history_langchain_format.append(HumanMessage(content=user_prompt))
+
+    return history_langchain_format
+
+
+def add_function_message_and_user_prompt(chat_history, query, results, user_prompt):
+    function_message = f'*Retrieval Results:*\nQuery: {
+        query}\nResults: {results}'
+    chat_history.append((user_prompt, function_message))
+    return chat_history
+
+
+def add_response_message(chat_history, response):
+    chat_history.append((None, response))
+    return chat_history
+
+
+def add_response_message_and_user_prompt(chat_history, response, user_prompt):
+    chat_history.append((user_prompt, response))
+    return chat_history
 
 
 def decide_retrieval(user_prompt, chat_history):
