@@ -1,11 +1,10 @@
-from tool_agent import init_agent, init_chatbot
+from llm import init_chatbot
 import gradio as gr
 
 from config import PURPOSE_CODES, PURPOSE_NAMES
 from classification import classification_function
 from orchestration import orchestrate
 
-purpose_llm = init_chatbot()
 llm = init_chatbot()
 
 with gr.Blocks(
@@ -22,7 +21,7 @@ with gr.Blocks(
     with gr.Tab(label="Access Purpose Identification"):
 
         access_purpose = gr.Dropdown(
-            choices=PURPOSE_NAMES, value='None', interactive=True, label='Data Access Purpose')
+            choices=PURPOSE_NAMES, interactive=True, label='Data Access Purpose')
 
         purpose_chatbot = gr.Chatbot(
             label="PBAC Identification Bot",
@@ -51,13 +50,13 @@ with gr.Blocks(
     with gr.Tab(label="RAG-based Chatbot"):
 
         access_purpose_mirror = gr.Dropdown(
-            choices=PURPOSE_NAMES, value='None', interactive=False, label='Data Access Purpose')
+            choices=PURPOSE_NAMES, interactive=False, label='Data Access Purpose')
 
         chatbot = gr.Chatbot(show_copy_button=True)
         msg = gr.Textbox()
 
         def respond(message, chat_history, access_purpose):
-            response = orchestrate(message, llm, chat_history)
+            response = orchestrate(message, llm, chat_history, access_purpose)
             if response.get('access_purpose', None) is not None:
                 access_purpose_index = PURPOSE_CODES.index(
                     response.get('access_purpose'))

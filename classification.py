@@ -149,6 +149,7 @@ def classification_function(user_prompt, chat_history):
         response['justification'] = "An error occurred during the access purpose classification of the user prompt. Please specify the access purpose. Describe the access purpose in more detail or state it explicitly."
         response['error_msg'] = str(e)
 
+    logger.info(f"Classification response: {response}")
     return response
 
 
