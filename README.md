@@ -58,4 +58,6 @@ pip install --upgrade-strategy eager "optimum[openvino,nncf]"
 2. Fix parallel memory issues
 3. Add instructions to gradio
 4. Add configs to gradio
-6. Fix purpose classification with history
+
+
+PROVIDE function input as such

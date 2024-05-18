@@ -1,4 +1,4 @@
-from llm import init_chatbot, init_naive_chat
+from llm import init_chatbot, init_naive_chat, init_chat
 import gradio as gr
 
 from config import PURPOSE_CODES, PURPOSE_NAMES

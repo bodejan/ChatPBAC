@@ -7,6 +7,7 @@ from langchain.memory import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from langchain_core.messages import SystemMessage
 from langchain_core.prompts import HumanMessagePromptTemplate
+from langchain_core.prompts import PromptTemplate
 
 from dotenv import load_dotenv
 import logging
@@ -54,7 +55,42 @@ def init_naive_chat():
     return chat
 
 
+def init_chat():
+    # template based on rlm/rag-prompt
+    template = """
+You are a helpful assistant. Use the following pieces of retrieved context to assist with user requests. If you don't know the answer, just say that you don't know.
+
+Context: {context} 
+"""
+
+    model = ChatOpenAI()
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                template,
+            ),
+            MessagesPlaceholder(variable_name="history"),
+            ("human", "{input}"),
+        ]
+    )
+    runnable = prompt | model
+
+    runnable_with_history = RunnableWithMessageHistory(
+        runnable,
+        get_session_history,
+        input_messages_key="input",
+        history_messages_key="history",
+    )
+
+    return runnable_with_history
+
+
 if __name__ == '__main__':
     # agent_with_chat_history = init_agent()
     # test_agent_with_history(agent_with_chat_history)
-    init_chatbot()
+    chat = init_chat()
+    history = ChatMessageHistory()
+    print(chat)
+    print(chat.invoke(
+        {"input": "What is the capital of France?", "context": "Berlin", "history": history}), chat)

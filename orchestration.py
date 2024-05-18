@@ -42,20 +42,15 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         retrieval_response = retrieve_data(user_prompt, access_purpose)
         query = retrieval_response.get('query')
         results = retrieval_response.get('results')
+        user_context_prompt = get_user_context_prompt(
+            user_prompt, query, results)
 
-        chat_history = add_function_message_and_user_prompt(
-            chat_history, query, results, user_prompt)
-        lang_chat_history = format_chat_history(chat_history, user_prompt)
-
-        # Generate informed response
-        """ chatbot_response = chatbot.invoke(
-            {"input": user_prompt, "context": results},
-            config={"configurable": {"session_id": "<foo>"}}
-        ) """
+        lang_chat_history = format_chat_history(
+            chat_history, user_context_prompt)
 
         chatbot_response = chatbot.invoke(lang_chat_history)
-        chat_history = add_response_message(
-            chat_history, chatbot_response.content)
+        chat_history = extend_chat_history(
+            chat_history, user_context_prompt, chatbot_response)
         logger.info(f"Chatbot response: {chatbot_response}")
 
         return {'output': chatbot_response.content,
@@ -67,10 +62,9 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
                 'chat_history': chat_history}
     else:
         lang_chat_history = format_chat_history(chat_history, user_prompt)
-        logger.info(f"Chat history: {lang_chat_history}")
         chatbot_response = chatbot.invoke(lang_chat_history)
-        chat_history = add_response_message_and_user_prompt(
-            chat_history, chatbot_response.content, user_prompt)
+        chat_history = extend_chat_history(
+            chat_history, user_prompt, chatbot_response.content)
         return {'output': chatbot_response.content,
                 'metadata': chatbot_response.response_metadata,
                 'chat_history': chat_history}
@@ -88,21 +82,27 @@ def format_chat_history(chat_history, user_prompt):
     return history_langchain_format
 
 
-def add_function_message_and_user_prompt(chat_history, query, results, user_prompt):
-    function_message = f'*Retrieval Results:*\nQuery: {
-        query}\nResults: {results}'
-    chat_history.append((user_prompt, function_message))
+def extend_chat_history(chat_history, user_prompt, chatbot_response):
+    chat_history.append((user_prompt, chatbot_response.content))
     return chat_history
 
 
-def add_response_message(chat_history, response):
-    chat_history.append((None, response))
-    return chat_history
-
-
-def add_response_message_and_user_prompt(chat_history, response, user_prompt):
-    chat_history.append((user_prompt, response))
-    return chat_history
+def get_user_context_prompt(user_prompt, query, results):
+    def get_context(query, results):
+        context = f"""SQL Retrieval Context:
+Query:
+```sql
+{query}
+```
+Results:
+```
+{results}
+```
+"""
+        return context
+    context = get_context(query, results)
+    user_context_prompt = user_prompt + "\n\n" + context
+    return user_context_prompt
 
 
 def decide_retrieval(user_prompt, chat_history):
