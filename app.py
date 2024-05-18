@@ -1,11 +1,11 @@
-from llm import init_chatbot, init_naive_chat, init_chat
+from llm import init_chat
 import gradio as gr
 
 from config import PURPOSE_CODES, PURPOSE_NAMES
 from classification import classification_function
 from orchestration import orchestrate
 
-llm = init_naive_chat()
+llm = init_chat()
 
 with gr.Blocks(
     title="PBAC-enhanced Chatbot",
