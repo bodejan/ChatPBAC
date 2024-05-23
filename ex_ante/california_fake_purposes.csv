@@ -1,0 +1,14 @@
+name,id,parent_id,code,aip_code,pip_code
+General-Purpose,1,,1,8191,8191
+Clinical-Care,2,1.0,2,2,3
+Research,3,1.0,4,124,125
+Public-Research,4,3.0,8,56,61
+Military-Research,5,4.0,16,16,29
+Non-Military-Research,6,4.0,32,32,45
+Private-Research,7,3.0,64,64,69
+Patient-Support-Service,8,1.0,128,896,897
+Billing,9,8.0,256,256,385
+Communication,10,8.0,512,512,641
+Third-Party,11,1.0,1024,7168,7169
+Marketing,12,11.0,2048,2048,3073
+Product-Development,13,11.0,4096,4096,5121
