@@ -10,7 +10,7 @@ from langchain_core.prompts import PromptTemplate
 import pandas as pd
 import logging
 
-from config import CONTEXT, PURPOSE_CODES, DB_PATH
+from config import DB_CONTEXT, PURPOSE_CODES, DB_PATH
 
 logger = logging.getLogger()
 
@@ -77,7 +77,7 @@ Classification:
     retrieval_decision_prompt = PromptTemplate(
         template=retrieval_decision_prompt_template,
         input_variables=["user_prompt", "chat_history"],
-        partial_variables={"context": CONTEXT})
+        partial_variables={"context": DB_CONTEXT})
 
     llm = OpenAI(temperature=0.1)
     chain = retrieval_decision_prompt | llm

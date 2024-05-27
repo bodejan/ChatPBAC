@@ -10,7 +10,7 @@ import logging
 
 from classification import classification_function
 from retrieval import retrieve_data, decide_retrieval
-from config import CONTEXT, PURPOSE_CODES, PURPOSE_NAMES
+from config import DB_CONTEXT, PURPOSE_CODES, PURPOSE_NAMES
 from llm import extend_chat_history, format_chat_history, get_user_context_prompt
 
 load_dotenv()

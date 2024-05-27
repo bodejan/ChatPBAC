@@ -1,34 +1,30 @@
 import json
 from langchain.pydantic_v1 import BaseModel, Field
-from langchain.tools import tool
-from langchain_openai import ChatOpenAI, OpenAI
-from langchain.chains import create_sql_query_chain
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    FewShotChatMessagePromptTemplate,
-    PromptTemplate
-)
+from langchain_openai import OpenAI
+from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.exceptions import OutputParserException
 from langchain.output_parsers import OutputFixingParser
 
-from config import PURPOSE_CODES, get_purpose_data
+from dotenv import load_dotenv
+
+from config import get_purpose_names, PURPOSES_v2
 
 import logging
 
 logger = logging.getLogger()
 
-PBAC_SYSTEM = f"""You are a helpful assistant that classifies a text input into a predefined access purpose category.
+PBAC_CLASSIFICATION_TEMPLATE = """You are a helpful assistant that classifies a text input into a predefined access purpose category.
 
 The following categories exist:
 
-{get_purpose_data()}
+{purpose_description}
+
+{format_instructions}
 
 Classify the input into one of the described categories.
-Use the defined category code.
-Always return your answer in a json format.
-Remember to only return a json string.
-"""
+
+Input: {user_prompt}"""
 
 
 def filter_json(input: str) -> str:
@@ -102,7 +98,7 @@ def validate_access_purpose(input):
         return False
 
     # Check if access_purpose is one of the PURPOSE_CODES
-    if input["access_purpose"] not in PURPOSE_CODES:
+    if input["access_purpose"] not in get_purpose_names():
         return False
 
     return True
@@ -110,24 +106,26 @@ def validate_access_purpose(input):
 
 class Classification(BaseModel):
     access_purpose: str = Field(
-        description="the identified access purpose", enum=PURPOSE_CODES)
+        description="the identified access purpose", enum=get_purpose_names())
     confidence: float = Field(description="the confidence at which the access purpose was identified", enum=[
-                              x / 10 for x in range(1, 11)])
+        x / 10 for x in range(1, 11)])
     justification: str = Field(
         description="the justification why the access purpose was identified")
 
 
 def classification_function(user_prompt):
     """Prompt classification function."""
-    classification_template = PBAC_SYSTEM + \
-        """\n\n{format_instructions}""" + """\n\nInput: {user_prompt}"""
     llm = OpenAI(temperature=0.1)
     parser = JsonOutputParser(pydantic_object=Classification)
+    format_instructions = parser.get_format_instructions()
+    format_instructions += "\nDo not use quotation marks in your justification to avoid json formatting errors."
+    purpose_description = [(key, value['description'])
+                           for key, value in PURPOSES_v2.items()]
     prompt = PromptTemplate(
-        template=classification_template,
+        template=PBAC_CLASSIFICATION_TEMPLATE,
         input_variables=["user_prompt"],
-        partial_variables={"format_instructions": parser.get_format_instructions(
-        ) + "\nDo not use quotation marks in your justification to avoid json formatting errors."},
+        partial_variables={"format_instructions": format_instructions,
+                           "purpose_description": purpose_description},
     )
 
     chain = prompt | llm | filter_json | parser
@@ -151,3 +149,9 @@ def classification_function(user_prompt):
 
     logger.info(f"Classification response: {response}")
     return response
+
+
+if __name__ == '__main__':
+    load_dotenv()
+    print(classification_function(
+        "I want to use the data for public research purposes."))

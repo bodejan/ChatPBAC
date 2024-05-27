@@ -1,7 +1,7 @@
 from llm import init_chat
 import gradio as gr
 
-from config import PURPOSE_CODES, PURPOSE_NAMES
+from config import PURPOSE_CODES, PURPOSE_NAMES, PURPOSES_v2
 from classification import classification_function
 from orchestration import orchestrate
 
@@ -21,7 +21,7 @@ with gr.Blocks(
     with gr.Tab(label="Access Purpose Identification"):
 
         access_purpose = gr.Dropdown(
-            choices=PURPOSE_NAMES, interactive=True, label='Data Access Purpose')
+            choices=list(PURPOSES_v2.keys()), interactive=True, label='Data Access Purpose')
 
         purpose_chatbot = gr.Chatbot(
             label="PBAC Identification Bot",
