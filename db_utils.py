@@ -21,9 +21,11 @@ def check_compliance(access_code, aip, pip):
     return (access_code & pip == 0) and (access_code & aip != 0)
 
 
-def get_schema_info(base):
+def get_table_info(base, include):
     schema_info = {}
-    for cls in base.__subclasses__():
+    classes = base.__subclasses__()
+    classes = [cls for cls in classes if cls in include]
+    for cls in classes:
         # Get the table comment
         table_description = cls.__table__.comment if cls.__table__.comment else ''
 
@@ -36,18 +38,9 @@ def get_schema_info(base):
                 'description': column_description
             }
 
-        relationships_info = {}
-        for rel in cls.__mapper__.relationships:
-            # Get the relationship comment from the info dictionary
-            rel_description = rel.info.get('description', '')
-            relationships_info[rel.key] = {
-                'description': rel_description
-            }
-
         table_info = {
             'description': table_description,
             'columns': columns_info,
-            'relationships': relationships_info
         }
         schema_info[cls.__tablename__] = table_info
 
@@ -60,19 +53,23 @@ def get_schema_info(base):
         for column_name, column_info in info['columns'].items():
             structured_string += f"  - {column_name} ({column_info['type']}): {
                 column_info['description']}\n"
-        structured_string += "Relationships:\n"
-        for rel_name, rel_info in info['relationships'].items():
-            structured_string += f"  - {rel_name}: {rel_info['description']}\n"
         structured_string += "\n"
 
     return structured_string
+
+
+def get_session():
+    engine = create_engine(DB_PATH)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 
 def close_session(session):
     session.close()
 
 
-def filter_accessible_records(records, access_code):
+def filter_results(records, access_code):
     def remove_none(array_of_dicts):
         # Remove key-value pairs where the value is None
         filtered_array = [{k: v for k, v in d.items() if v is not None}
@@ -99,7 +96,7 @@ def filter_accessible_records(records, access_code):
     return remove_none(filtered_records)
 
 
-def copy_medical_records_to_temp(session, medical_records):
+def insert_into_temp_table(session, medical_records):
     try:
         # Delete all entries in TempMedicalRecord
         session.query(TempMedicalRecord).delete()
@@ -134,59 +131,32 @@ def copy_medical_records_to_temp(session, medical_records):
         print("An error occurred:", str(e))
 
 
-def analyze_records(records):
-    is_same_class = False
+def evaluate_sensitivity(records):
+    sensitive = False
 
     # One record
     if type(records) == MedicalRecord:
         records = [records]
-        is_same_class = True
+        sensitive = True
     # Multiple records
     elif type(records) == list and type(records[0]) == MedicalRecord:
-        is_same_class = True
+        sensitive = True
     else:
         logging.info(f"Retrieved records are not of parent class. Type: {
                      type(records)}, Record: {records}")
 
-    return is_same_class, records
+    return sensitive
+
+
+def execute_text_query(session, query):
+    try:
+        text_query = text(query)
+        result = session.execute(text_query).fetchall()
+        return result
+    except Exception as e:
+        logging.error(f"An error occurred: {str(e)}")
+        return None
 
 
 if __name__ == "__main__":
-    start = time.time()
-
-    engine = create_engine(DB_PATH)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    try:
-
-        # Perform your query
-        sql_query = text("""
-            SELECT patient_name, reference_id, report_year
-            FROM medical_records
-            WHERE report_year = 2003
-            LIMIT 5;
-        """)
-        sql_query = text("""
-                    SELECT COUNT(*) AS row_count
-                    FROM medical_records;""")
-        # query = session.query(MedicalRecord.patient_name, MedicalRecord.reference_id, MedicalRecord.report_year).filter_by(
-        #    report_year=2003).limit(5).all()
-        query = session.execute(sql_query).fetchall()
-        print(query)
-        """ for r in query:
-            print(r.reference_id, r.report_year, r.patient_name) """
-
-        # Insert results into the temporary table
-        copy_medical_records_to_temp(session, query)
-        results = session.query(TempMedicalRecord).all()
-        """ for r in query:
-            print(r.reference_id, r.report_year, r.patient_name) """
-
-        filtered = filter_accessible_records(results, 2)
-        print(filtered)
-    except Exception as e:
-        print(f"An error occurred: {str(e)}")
-    finally:
-        print(f"Execution time: {time.time() - start}")
-        close_session(session)
+    pass
