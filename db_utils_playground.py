@@ -73,32 +73,30 @@ def close_session(session):
 
 
 def filter_accessible_records(records, access_code):
+    def remove_none(array_of_dicts):
+        # Remove key-value pairs where the value is None
+        filtered_array = [{k: v for k, v in d.items() if v is not None}
+                          for d in array_of_dicts]
+        return filtered_array
     filtered_records = []
 
-    if type(records) == TempMedicalRecord:
-        records = [records]
-
-    if type(records) == list and type(records[0]) == TempMedicalRecord:
-        for record in records:
-            metadata = record.metadata_
-            masked_record = {}
-            for column in record.__table__.columns:
-                column_name = column.name
-                aip = getattr(metadata, f"{column_name}_aip", None)
-                pip = getattr(metadata, f"{column_name}_pip", None)
-                if aip is not None and pip is not None:
-                    if check_compliance(access_code, aip, pip):
-                        masked_record[column_name] = getattr(
-                            record, column_name)
-                    else:
-                        masked_record[column_name] = 'Masked'
+    for record in records:
+        metadata = record.metadata_
+        masked_record = {}
+        for column in record.__table__.columns:
+            column_name = column.name
+            aip = getattr(metadata, f"{column_name}_aip", None)
+            pip = getattr(metadata, f"{column_name}_pip", None)
+            attribute = getattr(record, column_name)
+            if aip is not None and pip is not None and attribute is not None:
+                if check_compliance(access_code, aip, pip):
+                    masked_record[column_name] = attribute
                 else:
-                    masked_record[column_name] = getattr(record, column_name)
-            filtered_records.append(masked_record)
-        return filtered_records
-    else:
-        logging.error("Invalid input type")
-        return records
+                    masked_record[column_name] = 'Masked'
+            else:
+                masked_record[column_name] = getattr(record, column_name)
+        filtered_records.append(masked_record)
+    return remove_none(filtered_records)
 
 
 def copy_medical_records_to_temp(session, medical_records):
@@ -136,6 +134,23 @@ def copy_medical_records_to_temp(session, medical_records):
         print("An error occurred:", str(e))
 
 
+def analyze_records(records):
+    is_same_class = False
+
+    # One record
+    if type(records) == MedicalRecord:
+        records = [records]
+        is_same_class = True
+    # Multiple records
+    elif type(records) == list and type(records[0]) == MedicalRecord:
+        is_same_class = True
+    else:
+        logging.info(f"Retrieved records are not of parent class. Type: {
+                     type(records)}, Record: {records}")
+
+    return is_same_class, records
+
+
 if __name__ == "__main__":
     start = time.time()
 
@@ -144,25 +159,29 @@ if __name__ == "__main__":
     session = Session()
 
     try:
-        """ temp_table = create_temporary_table(
-            engine, MedicalRecord.__table__, 'temp_medical_record')
-        print(temp_table) """
 
         # Perform your query
-
-        query = session.query(MedicalRecord).filter_by(
-            report_year=2003).limit(5).all()
+        sql_query = text("""
+            SELECT patient_name, reference_id, report_year
+            FROM medical_records
+            WHERE report_year = 2003
+            LIMIT 5;
+        """)
+        sql_query = text("""
+                    SELECT COUNT(*) AS row_count
+                    FROM medical_records;""")
+        # query = session.query(MedicalRecord.patient_name, MedicalRecord.reference_id, MedicalRecord.report_year).filter_by(
+        #    report_year=2003).limit(5).all()
+        query = session.execute(sql_query).fetchall()
         print(query)
-        for r in query:
-            print(r.reference_id, r.patient_name, r.report_year, r.diagnosis_category,
-                  r.diagnosis_sub_category, r.treatment_category)
+        """ for r in query:
+            print(r.reference_id, r.report_year, r.patient_name) """
 
         # Insert results into the temporary table
         copy_medical_records_to_temp(session, query)
         results = session.query(TempMedicalRecord).all()
-        for r in results:
-            print(r.reference_id, r.patient_name, r.report_year, r.diagnosis_category,
-                  r.diagnosis_sub_category, r.metadata_.patient_name_aip, r.treatment_category)
+        """ for r in query:
+            print(r.reference_id, r.report_year, r.patient_name) """
 
         filtered = filter_accessible_records(results, 2)
         print(filtered)
