@@ -32,7 +32,7 @@ class MedicalRecord(Base):
         Integer, comment="Gender of the patient, available options: ['Male' 'Female' nan]")
     findings = Column(Text, comment='Findings from the medical examination')
     patient_name = Column(VARCHAR, comment='Full name of the patient')
-    patient_age = Column(Float, comment='Age of the patient')
+    patient_age = Column(Integer, comment='Age of the patient')
     patient_phone = Column(VARCHAR, comment='Phone number of the patient')
     patient_address = Column(VARCHAR, comment='Address of the patient')
     patient_blood_type = Column(
@@ -49,8 +49,51 @@ class MedicalRecord(Base):
     consulting_physician = Column(
         VARCHAR, comment="Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']")
 
-    metadata_ = relationship("MedicalMetadata", back_populates="medical_record",
-                             uselist=False)
+
+class TempMedicalRecord(Base):
+    __tablename__ = 'temp_medical_records'
+    __table_args__ = {
+        'comment': "Table containing This data is from the California Department of Managed Health Care (DMHC). It contains all decisions from Independent Medical Reviews (IMR) administered by the DMHC since January 1, 2001. An IMR is an independent review of a denied, delayed, or modified health care service that the health plan has determined to be not medically necessary, experimental/investigational or non-emergent/urgent. If the IMR is decided in an enrollee's favor, the health plan must authorize the service or treatment requested."}
+
+    reference_id = Column(VARCHAR, ForeignKey('medical_records.reference_id'),
+                          primary_key=True, comment='Unique reference ID for the medical record')
+    report_year = Column(
+        Integer, comment='Year of the medical report, available options: [2016 2006 2015 2014 2010 2005 2004 2009 2008 2007 2001 2013 2012 2002 2003 2011]')
+    diagnosis_category = Column(VARCHAR, comment="Primary diagnosis category, available options: ['Infectious' 'Mental' 'Autism Spectrum' 'Prevention/Good Health' 'Cardiac/Circulatory' 'OB-Gyn / Pregnancy' 'Digestive System / Gastrointestinal' 'Orthopedic / Musculoskeletal' 'Central Nervous System/ Neuromuscular' 'Endocrine/ Metabolic' 'Pediatrics' 'Chronic Pain' 'Respiratory System' 'Cancer' 'Morbid Obesity' 'Ears, Nose, Throat' 'Post Surgical Complication' 'Immunologic' 'Skin' 'Not Applicable' 'Foot' 'Dental' 'Blood Related' 'Genetic' 'Genitourinary/ Kidney' 'Vision' 'Trauma/Injuries' 'Organ Failure' 'Alcohol and Drug Addiction']")
+    diagnosis_sub_category = Column(
+        VARCHAR, comment='Sub-category of the diagnosis')
+    treatment_category = Column(VARCHAR, comment="Primary treatment category, available options: ['Pharmacy/Prescription Drugs' 'Mental Health Treatment' 'Autism Related Treatment' 'Diagnostic Imaging, Screening and Testing' 'Cardio Vascular' 'Durable Medical Equipment' 'Diagnostic/Physician Evaluation' 'Orthopedic' 'Emergency/Urgent Care' 'General Surgery' 'Acute Medical Services - Outpatient' 'Not Applicable' 'Pain Management' 'Cancer Treatment' 'Reconstructive/Plastic Surgery' 'Rehabilitation Services - Skilled Nursing Facility - Inpatient' 'Special Procedure' 'Electrical/ Thermal/ Radiofreq. Interventions' 'Alternative Treatment' 'OB/GYN Procedures' 'Neurosugery' 'Dental/Orthodontic' 'Home Health Care' 'Acute Medical Services - Inpatient' 'Ear, Nose and Throat Procedures' 'Rehabilitation Services - Outpatient' 'Vision' 'Urology' nan 'Preventive Health Screening' 'Chiropractic' 'Ophthalmology']")
+    treatment_sub_category = Column(
+        VARCHAR, comment='Sub-category of the treatment')
+    determination = Column(
+        VARCHAR, comment="Indicates if the determination was upheld or overturned, available options: ['Overturned Decision of Health Plan' 'Upheld Decision of Health Plan']")
+    treatment_type = Column(
+        VARCHAR, comment="Type of treatment administered, available options: ['Medical Necessity' 'Experimental/Investigational' 'Urgent Care']")
+    patient_age_range = Column(
+        VARCHAR, comment="Age range of the patient, available options: ['41-50' '21-30' '0-10' '65+' '51-64' '11_20' '31-40' nan]")
+    patient_gender = Column(
+        Integer, comment="Gender of the patient, available options: ['Male' 'Female' nan]")
+    findings = Column(Text, comment='Findings from the medical examination')
+    patient_name = Column(VARCHAR, comment='Full name of the patient')
+    patient_age = Column(Integer, comment='Age of the patient')
+    patient_phone = Column(VARCHAR, comment='Phone number of the patient')
+    patient_address = Column(VARCHAR, comment='Address of the patient')
+    patient_blood_type = Column(
+        VARCHAR, comment="Blood type of the patient, available options: ['A-' 'B+' 'O+' 'AB-' 'O-' 'AB+' 'B-' 'A+']")
+    patient_ssn = Column(
+        VARCHAR, comment='Social Security Number of the patient')
+    patient_insurance_provider = Column(
+        VARCHAR, comment="Insurance provider of the patient, available options: ['Kaiser Foundation' 'Highmark' 'Anthem Inc.' 'Cigna Health' 'HCSC(Health Care Service Corporation)' 'Molina Healthcare' 'WellCare' 'Medicare' 'Humana' 'UnitedHealth Group' 'Independence Health Group' 'Medicaid' 'CVS Health(Aetna)' 'Blue Cross Blue Shield' 'Centene Corporation' 'GuideWell Mutual Holding']")
+    patient_insurance_number = Column(
+        VARCHAR, comment='Insurance number of the patient')
+    patient_emergency_contact = Column(
+        VARCHAR, comment='Emergency contact details of the patient')
+    patient_occupation = Column(VARCHAR, comment='Occupation of the patient')
+    consulting_physician = Column(
+        VARCHAR, comment="Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']")
+
+    metadata_ = relationship(
+        "MedicalMetadata", back_populates="temp_medical_record", uselist=False, primaryjoin="TempMedicalRecord.reference_id == MedicalMetadata.reference_id")
 
 
 class MedicalMetadata(Base):
@@ -58,7 +101,7 @@ class MedicalMetadata(Base):
     __table_args__ = {
         'comment': 'Table containing purpose-based access control metadata for medical records; allowed intended purposes (AIP) and prohibited intended purposes (PIP)'}
 
-    reference_id = Column(VARCHAR, ForeignKey('medical_records.reference_id'),
+    reference_id = Column(VARCHAR, ForeignKey('temp_medical_records.reference_id'),
                           primary_key=True, comment='Reference ID linking to the medical record')
     diagnosis_category_aip = Column(
         Integer, comment='Diagnosis category AIP code')
@@ -121,8 +164,8 @@ class MedicalMetadata(Base):
     consulting_physician_pip = Column(
         Integer, comment='Consulting physician PIP code')
 
-    medical_record = relationship(
-        "MedicalRecord", back_populates="metadata_")
+    temp_medical_record = relationship(
+        "TempMedicalRecord", back_populates="metadata_")
 
 
 class Purpose(Base):

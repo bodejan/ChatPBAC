@@ -14,7 +14,7 @@ import logging
 
 logger = logging.getLogger()
 
-PBAC_CLASSIFICATION_TEMPLATE = """You are a helpful assistant that classifies a text input into a predefined access purpose category.
+PBAC_CLASSIFICATION_TEMPLATE = """You are a helpful assistant that classifies a text input into a predefined hierarchical access purpose category. 
 
 The following categories exist:
 
@@ -22,9 +22,11 @@ The following categories exist:
 
 {format_instructions}
 
-Classify the input into one of the described categories.
+Classify the input into one of the described categories. Use the most specific category.
 
-Input: {user_prompt}"""
+Input: {user_prompt}
+
+Output:"""
 
 
 def filter_json(input: str) -> str:

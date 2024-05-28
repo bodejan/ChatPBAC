@@ -10,7 +10,8 @@ from langchain_core.prompts import PromptTemplate
 import pandas as pd
 import logging
 
-from config import DB_CONTEXT, PURPOSE_CODES, DB_PATH
+from config import DB_CONTEXT, PURPOSE_CODES, DB_PATH, get_purpose_names
+from db_utils import get_session
 
 logger = logging.getLogger()
 
@@ -30,10 +31,11 @@ def pbac_retrieval_prompt(db, purpose):
 
 
 def retrieve_data(user_prompt: str, access_purpose: str):
-    if access_purpose not in PURPOSE_CODES:
+    if access_purpose not in get_purpose_names():
         return {'query': 'None', 'results': 'Unable to retrieve data. Please provide a valid access purpose.'}
 
     try:
+        session = get_session()
         db = SQLDatabase.from_uri(DB_PATH)
         llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
         prompt = pbac_retrieval_prompt(db, access_purpose)
@@ -46,6 +48,47 @@ def retrieve_data(user_prompt: str, access_purpose: str):
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
         return {'query': query, 'results': 'An error occurred: ' + str(e)}
+    finally:
+        session.close()
+
+
+RETRIEVAL_TEMPLATE = """Given an input question, create syntactically correct SQL Alchemy python code to run. Unless the user specifies in his question a specific number of examples he wishes to obtain, always limit your query to at most {top_k} results. 
+You can order the results by a relevant column to return the most interesting examples in the database.
+
+Never query for all the columns from a specific table, only retrieve relevant columns given the question.
+
+Pay attention to use only the column names that you can see in the schema description. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
+
+Examples:
+1. "Retrieve the list of all patients with a diagnosis of 'Cancer'." - SQL Alchemy code
+
+Only use the following tables:
+{table_info}
+
+Question: {input}
+"""
+
+
+def retrieve_data_v2(user_prompt: str, access_purpose: str):
+    if access_purpose not in get_purpose_names():
+        return {'query': 'None', 'results': 'Unable to retrieve data. Please provide a valid access purpose.'}
+
+    try:
+        session = get_session()
+        db = SQLDatabase.from_uri(DB_PATH)
+        llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
+        prompt = pbac_retrieval_prompt(db, access_purpose)
+        chain = create_sql_query_chain(llm, db, k=5, prompt=prompt)
+        query = chain.invoke({"question": user_prompt})
+        logger.info(f"Query: {query}")
+        results = db.run(query)
+        logger.info(f"Results: {results}")
+        return {'query': query, 'results': results}
+    except Exception as e:
+        logger.error(f"An error occurred: {str(e)}")
+        return {'query': query, 'results': 'An error occurred: ' + str(e)}
+    finally:
+        session.close()
 
 
 def decide_retrieval(user_prompt, chat_history):
@@ -57,7 +100,7 @@ Your task is to analyze each input and classify it as either "True" for retrieva
 
 Only retrieval requests for the following context are valid. Other retrieval requests should be classified as "False".
 
-# Context: {context}
+Context: {context}
 
 Here are some examples to guide you:
 1. "Please summarize your response" - False
@@ -70,6 +113,7 @@ Here are some examples to guide you:
 Now, classify the following input:
 
 Chat history: {chat_history}
+
 Input: {user_prompt}
 
 Classification:

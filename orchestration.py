@@ -10,23 +10,20 @@ import logging
 
 from classification import classification_function
 from retrieval import retrieve_data, decide_retrieval
-from config import DB_CONTEXT, PURPOSE_CODES, PURPOSE_NAMES
 from llm import extend_chat_history, format_chat_history, get_user_context_prompt
 
 load_dotenv()
 logger = logging.getLogger()
 
 
-def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose_name: str = None):
+def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
     logger.info(f"Gradio chat history: {chat_history}")
     retrieval_decision = decide_retrieval(user_prompt, chat_history)
     if "True" in retrieval_decision:
-        if access_purpose_name is not None:
+        if access_purpose is not 'None' or 'Error':
             logger.info(f'Access purpose provided by user: {
-                        access_purpose_name}')
-            access_purpose = PURPOSE_CODES[PURPOSE_NAMES.index(
-                access_purpose_name)]
+                        access_purpose}')
             justification = 'User-provided access purpose'
             confidence = 1.0
         else:
@@ -41,6 +38,7 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         retrieval_response = retrieve_data(user_prompt, access_purpose)
         query = retrieval_response.get('query')
         results = retrieval_response.get('results')
+
         user_context_prompt = get_user_context_prompt(
             user_prompt, query, results)
 

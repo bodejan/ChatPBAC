@@ -2,7 +2,7 @@ import logging
 
 DB_CONTEXT = "The dataset contains detailed records of medical visits from multiple patients, including information about symptoms, diagnoses, treatments, and patient demographics. Each record also includes specific details such as the consulting physician, patient consent for treatments, emergency contacts, and the intended purposes of the medical data."
 
-DB_PATH = "sqlite:///medical_database.db"
+DB_PATH = 'sqlite:///medical_database.db'
 
 DB_DESCRIPTION = """
 Table: medical_records
@@ -136,6 +136,12 @@ PURPOSES_v2 = {
         "aip_code": 4096,
         "pip_code": 5121,
         "description": "Data access for the development and testing of new third-party medical products and services."
+    },
+    "None": {
+        "description": "No specific access purpose identified."
+    },
+    "Error": {
+        "description": "An error occurred please retry."
     }
 }
 

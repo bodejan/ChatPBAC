@@ -32,17 +32,15 @@ with gr.Blocks(
 
         def purpose_respond(message, chat_history):
             response = classification_function(message)
-            access_purpose_index = PURPOSE_CODES.index(
-                response.get('access_purpose'))
             chat_history.append(
                 (message,
-                 f'Identified Access Purposes: {PURPOSE_NAMES[access_purpose_index]}\n' +
+                 f'Identified Access Purposes: {response.get('access_purpose')}\n' +
                  f'Justification: {response.get("justification", "Sorry, there is no justification available.")}\n' +
                  f'Confidence: {response.get("confidence", "Sorry, there is no confidence score available.")}\n' +
                  'If the identification was incorrect, please provide a more detailed description of your data access purpose.')
             )
 
-            return "", chat_history, gr.update(value=PURPOSE_NAMES[access_purpose_index])
+            return "", chat_history, gr.update(value=response.get('access_purpose'))
 
         purpose_msg.submit(purpose_respond, [purpose_msg, purpose_chatbot],
                            [purpose_msg, purpose_chatbot, access_purpose])
