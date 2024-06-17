@@ -8,8 +8,7 @@ from langchain_core.prompts import (
 from dotenv import load_dotenv
 import logging
 
-from classification import classification_function
-from retrieval import retrieve_data, decide_retrieval, retrieve_data_v2
+from retrieval import decide_retrieval, retrieve_data_v2
 from llm import extend_chat_history, format_chat_history, get_user_context_prompt
 
 load_dotenv()
@@ -18,21 +17,9 @@ logger = logging.getLogger()
 
 def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
-    logger.info(f"Gradio chat history: {chat_history}")
     retrieval_decision = decide_retrieval(user_prompt)
     if "True" in retrieval_decision:
-        if access_purpose != 'None' or 'Error':
-            logger.info(f'Access purpose provided by user: {
-                        access_purpose}')
-            justification = 'User-provided access purpose'
-            confidence = 1.0
-        else:
-            # Classify prompt
-            classification_response = classification_function(
-                user_prompt)
-            access_purpose = classification_response.get('access_purpose')
-            justification = classification_response.get('justification')
-            confidence = classification_response.get('confidence')
+        logger.info(f'Access purpose provided by user: {access_purpose}')
 
         # Retrieve data
         retrieval_response = retrieve_data_v2(user_prompt, access_purpose)
@@ -53,8 +40,6 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         return {'output': chatbot_response.content,
                 'query': query, 'results': results,
                 'access_purpose': access_purpose,
-                'justification': justification,
-                'confidence': confidence,
                 'metadata': chatbot_response.response_metadata,
                 'chat_history': chat_history}
     else:

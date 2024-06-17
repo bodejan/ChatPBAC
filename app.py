@@ -1,8 +1,7 @@
 from llm import init_chat
 import gradio as gr
 
-from config import PURPOSE_CODES, PURPOSE_NAMES, PURPOSES_v2
-from classification import classification_function
+from config import PURPOSES_v2
 from orchestration import orchestrate
 
 llm = init_chat()
@@ -13,79 +12,34 @@ with gr.Blocks(
 
     gr.Markdown(
         "# PBAC-enhanced Chatbot\n" +
-        "*This chatbot is designed to help you with your data access requests.*\n" +
-        "*Remember to provide your data access purpose and signal a desired retrieval with keywords like 'retrieve', 'query', or 'search'.*\n",
+        "This chatbot is designed to help you with your data access requests.\n" +
+        "Remember to provide your data access purpose and signal a desired retrieval with keywords like *retrieve*, *query*, or *search*.\n",
         line_breaks=True
     )
 
-    with gr.Tab(label="Access Purpose Identification"):
+    access_purpose = gr.Dropdown(
+        choices=list(PURPOSES_v2.keys()), interactive=True, label='Data Access Purpose')
 
-        access_purpose = gr.Dropdown(
-            choices=list(PURPOSES_v2.keys()), interactive=True, label='Data Access Purpose')
+    chatbot = gr.Chatbot(show_copy_button=True)
+    msg = gr.Textbox()
 
-        purpose_chatbot = gr.Chatbot(
-            label="PBAC Identification Bot",
-            show_label=True)
-
-        purpose_msg = gr.Textbox(
-            placeholder="Please describe your data access purpose. Alternatively, use the select-box above.")
-
-        def purpose_respond(message, chat_history):
-            response = classification_function(message)
+    def respond(message, chat_history, access_purpose):
+        if access_purpose is None:
             chat_history.append(
-                (message,
-                 f'Identified Access Purposes: {response.get('access_purpose')}\n' +
-                 f'Justification: {response.get("justification", "Sorry, there is no justification available.")}\n' +
-                 f'Confidence: {response.get("confidence", "Sorry, there is no confidence score available.")}\n' +
-                 'If the identification was incorrect, please provide a more detailed description of your data access purpose.')
-            )
-
-            return "", chat_history, gr.update(value=response.get('access_purpose'))
-
-        purpose_msg.submit(purpose_respond, [purpose_msg, purpose_chatbot],
-                           [purpose_msg, purpose_chatbot, access_purpose])
-
-    with gr.Tab(label="RAG-based Chatbot"):
-
-        access_purpose_mirror = gr.Dropdown(
-            choices=PURPOSE_NAMES, interactive=False, label='Data Access Purpose')
-
-        chatbot = gr.Chatbot(show_copy_button=True)
-        msg = gr.Textbox()
-
-        def respond(message, chat_history, access_purpose):
-            if access_purpose is None:
-                chat_history.append(
-                    (message, 'Please provide a data access purpose in the "Access Purpose Identification" tab.'))
-                return "", chat_history
-            else:
-                response = orchestrate(
-                    message, llm, chat_history, access_purpose)
-                """ chat_history.append(
-                    (message,
-                     f'Query: {response.get(
-                         "query", "Sorry, there is no query available.")}\n' +
-                     f'Query Results: {response.get(
-                         "results", "Sorry, there are no results available.")}'
-                     )
-                )
-                chat_history.append((None, response.get('output'))) """
-                # chat_history.append((message, response.get('output')))
-                chat_history = response.get('chat_history')
-
+                (message, 'Please provide a "Data Access Purpose".'))
             return "", chat_history
+        else:
+            response = orchestrate(
+                message, llm, chat_history, access_purpose)
+            chat_history = response.get('chat_history')
 
-        msg.submit(respond, [msg, chatbot, access_purpose],
-                   [msg, chatbot])
+        return "", chat_history
 
-    def update_mirror(access_purpose):
-        return gr.update(value=access_purpose)
-
-    access_purpose.change(
-        update_mirror, access_purpose, access_purpose_mirror)
+    msg.submit(respond, [msg, chatbot, access_purpose],
+               [msg, chatbot])
 
     clear = gr.ClearButton(
-        [msg, purpose_msg, chatbot, purpose_chatbot, access_purpose, access_purpose_mirror])
+        [msg, chatbot, access_purpose])
 
 
 if __name__ == "__main__":
