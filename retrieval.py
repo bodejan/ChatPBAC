@@ -36,7 +36,6 @@ def retrieve_data_v2(user_prompt: str, access_purpose: str):
     try:
         session = get_session()
         db = SQLDatabase.from_uri(DB_PATH)
-        create_temp_pbac_table(access_purpose)
         llm = OpenAI(temperature=0)
         prompt = PromptTemplate(
             template=RETRIEVAL_TEMPLATE,
