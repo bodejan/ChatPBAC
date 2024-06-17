@@ -80,13 +80,14 @@ def retrieve_data_v2(user_prompt: str, access_purpose: str):
     try:
         session = get_session()
         db = SQLDatabase.from_uri(DB_PATH)
+        create_temp_pbac_table(access_purpose)
         llm = OpenAI(temperature=0)
         prompt = PromptTemplate(
             template=RETRIEVAL_TEMPLATE,
             input_variables=["user_prompt"],
             partial_variables={"dialect": db.dialect,
                                "top_k": 5,
-                               "table_info": get_table_info(Base, [MedicalRecord])}
+                               "table_info": get_table_info(Base, [PBACMedicalRecord])}
         )
         chain = prompt | llm
         query = chain.invoke({"user_prompt": user_prompt})
@@ -97,6 +98,7 @@ def retrieve_data_v2(user_prompt: str, access_purpose: str):
         logger.info(f"Results: {results}")
 
         if evaluate_sensitivity(results):
+            # if True:
             insert_into_temp_table(session, results)
             results = filter_results(session, access_code)
             logger.info(f"Filtered Results: {results}")
@@ -108,7 +110,7 @@ def retrieve_data_v2(user_prompt: str, access_purpose: str):
         session.close()
 
 
-def decide_retrieval(user_prompt, chat_history):
+def decide_retrieval(user_prompt):
     """Decide if a data retrieval request is present in the user prompt."""
     retrieval_decision_prompt_template = """
 You are an advanced language model trained to identify whether a given text input contains a request for data retrieval.
@@ -129,21 +131,19 @@ Here are some examples to guide you:
 
 Now, classify the following input:
 
-Chat history: {chat_history}
-
 Input: {user_prompt}
 
 Classification:
 """
     retrieval_decision_prompt = PromptTemplate(
         template=retrieval_decision_prompt_template,
-        input_variables=["user_prompt", "chat_history"],
+        input_variables=["user_prompt"],
         partial_variables={"context": DB_CONTEXT})
 
     llm = OpenAI(temperature=0.1)
     chain = retrieval_decision_prompt | llm
     response = chain.invoke(
-        {"user_prompt": user_prompt, "chat_history": chat_history})
+        {"user_prompt": user_prompt})
     logger.info(f"Retrieval Decision: {response}")
     return response
 
@@ -151,3 +151,5 @@ Classification:
 if __name__ == '__main__':
     print(retrieve_data_v2(
         "Retrieve the name for the following ID: MN16-22639", "Research"))
+    # print(retrieve_data_v2(
+    #    "How many records are in the db?", "Research"))

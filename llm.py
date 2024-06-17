@@ -37,7 +37,7 @@ def get_user_context_prompt(user_prompt, query, results):
 
 -----------------
 
-*SQL Retrieval Context:*
+SQL Retrieval Context:
 *Query:*
 ```sql
 {query}

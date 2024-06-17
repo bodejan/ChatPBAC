@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import logging
 
 from classification import classification_function
-from retrieval import retrieve_data, decide_retrieval
+from retrieval import retrieve_data, decide_retrieval, retrieve_data_v2
 from llm import extend_chat_history, format_chat_history, get_user_context_prompt
 
 load_dotenv()
@@ -19,9 +19,9 @@ logger = logging.getLogger()
 def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_history: list, access_purpose: str = None):
     # Step 1: Look at prompt and check if it contains a data retrieval request
     logger.info(f"Gradio chat history: {chat_history}")
-    retrieval_decision = decide_retrieval(user_prompt, chat_history)
+    retrieval_decision = decide_retrieval(user_prompt)
     if "True" in retrieval_decision:
-        if access_purpose is not 'None' or 'Error':
+        if access_purpose != 'None' or 'Error':
             logger.info(f'Access purpose provided by user: {
                         access_purpose}')
             justification = 'User-provided access purpose'
@@ -35,7 +35,7 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
             confidence = classification_response.get('confidence')
 
         # Retrieve data
-        retrieval_response = retrieve_data(user_prompt, access_purpose)
+        retrieval_response = retrieve_data_v2(user_prompt, access_purpose)
         query = retrieval_response.get('query')
         results = retrieval_response.get('results')
 

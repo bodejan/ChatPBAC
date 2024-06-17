@@ -269,5 +269,12 @@ def get_purpose_names():
     return list(PURPOSES_v2.keys())
 
 
+def get_purpose_name_by_code(code):
+    for name, info in PURPOSES_v2.items():
+        if info.get("code") == code:
+            return name
+    return "Code not found"
+
+
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')

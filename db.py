@@ -48,12 +48,14 @@ class MedicalRecord(Base):
     patient_occupation = Column(VARCHAR, comment='Occupation of the patient')
     consulting_physician = Column(
         VARCHAR, comment="Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']")
+    metadata_ = relationship(
+        "MedicalMetadata", back_populates="medical_record", uselist=False, primaryjoin="MedicalRecord.reference_id == MedicalMetadata.reference_id")
 
 
-class TempMedicalRecord(Base):
-    __tablename__ = 'temp_medical_records'
+class PBACMedicalRecord(Base):
+    __tablename__ = 'pbac_medical_records'
     __table_args__ = {
-        'comment': "Table containing This data is from the California Department of Managed Health Care (DMHC). It contains all decisions from Independent Medical Reviews (IMR) administered by the DMHC since January 1, 2001. An IMR is an independent review of a denied, delayed, or modified health care service that the health plan has determined to be not medically necessary, experimental/investigational or non-emergent/urgent. If the IMR is decided in an enrollee's favor, the health plan must authorize the service or treatment requested."}
+        'comment': "medical_records table with access control"}
 
     reference_id = Column(VARCHAR, ForeignKey('medical_records.reference_id'),
                           primary_key=True, comment='Unique reference ID for the medical record')
@@ -92,16 +94,13 @@ class TempMedicalRecord(Base):
     consulting_physician = Column(
         VARCHAR, comment="Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']")
 
-    metadata_ = relationship(
-        "MedicalMetadata", back_populates="temp_medical_record", uselist=False, primaryjoin="TempMedicalRecord.reference_id == MedicalMetadata.reference_id")
-
 
 class MedicalMetadata(Base):
     __tablename__ = 'medical_metadata'
     __table_args__ = {
         'comment': 'Table containing purpose-based access control metadata for medical records; allowed intended purposes (AIP) and prohibited intended purposes (PIP)'}
 
-    reference_id = Column(VARCHAR, ForeignKey('temp_medical_records.reference_id'),
+    reference_id = Column(VARCHAR, ForeignKey('medical_records.reference_id'),
                           primary_key=True, comment='Reference ID linking to the medical record')
     diagnosis_category_aip = Column(
         Integer, comment='Diagnosis category AIP code')
@@ -164,8 +163,8 @@ class MedicalMetadata(Base):
     consulting_physician_pip = Column(
         Integer, comment='Consulting physician PIP code')
 
-    temp_medical_record = relationship(
-        "TempMedicalRecord", back_populates="metadata_")
+    medical_record = relationship(
+        "MedicalRecord", back_populates="metadata_")
 
 
 class Purpose(Base):
