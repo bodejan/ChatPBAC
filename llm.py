@@ -1,8 +1,11 @@
 from langchain_openai import ChatOpenAI
 from langchain.schema import AIMessage, HumanMessage
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
 from dotenv import load_dotenv
 import logging
+
+from config import DB_CONTEXT
 
 logger = logging.getLogger()
 
@@ -10,8 +13,26 @@ load_dotenv()
 
 
 def init_chat():
-    chat = ChatOpenAI()
-    return chat
+    chat = ChatOpenAI(temperature=0.2)
+
+    system_prompt = (
+        "You are a helpful assistant. Answer all questions to the best of your ability. "
+        "You have access to an SQL database. "
+        f"Database description: {DB_CONTEXT}"
+    )
+
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                system_prompt,
+            ),
+            MessagesPlaceholder(variable_name="messages"),
+        ]
+    )
+
+    chain = prompt | chat
+    return chain
 
 
 def format_chat_history(chat_history, user_prompt):
