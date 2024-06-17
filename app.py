@@ -3,6 +3,7 @@ import gradio as gr
 
 from config import PURPOSES_v2
 from orchestration import orchestrate
+from retrieval import create_temp_pbac_table
 
 llm = init_chat()
 
@@ -19,6 +20,11 @@ with gr.Blocks(
 
     access_purpose = gr.Dropdown(
         choices=list(PURPOSES_v2.keys()), interactive=True, label='Data Access Purpose')
+
+    def update(access_purpose):
+        create_temp_pbac_table(access_purpose)
+
+    access_purpose.change(update, access_purpose)
 
     chatbot = gr.Chatbot(show_copy_button=True)
     msg = gr.Textbox()

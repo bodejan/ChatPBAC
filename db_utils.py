@@ -80,7 +80,7 @@ def create_temp_pbac_table(access_purpose):
         all = session.query(MedicalRecord).all()
         filter_and_insert_records(session, all, access_code)
         logging.info(
-            f"Temp. PBAC table for purpose '{access_purpose}' created successfully.")
+            f"Temp. PBAC table for purpose '{access_purpose}' successfully created.")
     except Exception as e:
         logging.error(f"An error occurred: {str(e)}")
     finally:
@@ -129,7 +129,6 @@ def filter_and_insert_records(session, records, access_code):
 
         # Commit the changes
         session.commit()
-        print("Medical records filtered and copied successfully to PBACMedicalRecord.")
     except Exception as e:
         # Rollback the session if an error occurs
         session.rollback()

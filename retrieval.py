@@ -33,7 +33,6 @@ def retrieve_data_v2(user_prompt: str, access_purpose: str):
     if access_purpose not in list(PURPOSES_v2.keys()):
         return {'query': 'None', 'results': 'Unable to retrieve data. Please provide a valid access purpose.'}
 
-    access_code = PURPOSES_v2.get(access_purpose).get('code')
     try:
         session = get_session()
         db = SQLDatabase.from_uri(DB_PATH)
