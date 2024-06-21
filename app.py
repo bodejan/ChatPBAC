@@ -1,5 +1,6 @@
 from llm import init_chat
 import gradio as gr
+import asyncio
 
 from config import PURPOSES
 from orchestration import orchestrate
@@ -21,11 +22,6 @@ with gr.Blocks(
     access_purpose = gr.Dropdown(
         choices=list(PURPOSES.keys()), interactive=True, label='Data Access Purpose')
 
-    def update(access_purpose):
-        create_temp_pbac_table(access_purpose)
-
-    access_purpose.change(update, access_purpose)
-
     chatbot = gr.Chatbot(show_copy_button=True)
     msg = gr.Textbox()
 
@@ -46,6 +42,16 @@ with gr.Blocks(
 
     clear = gr.ClearButton(
         [msg, chatbot, access_purpose])
+
+    async def update(access_purpose):
+        asyncio.create_task(create_temp_pbac_table_async(access_purpose))
+        return access_purpose, None, None
+
+    async def create_temp_pbac_table_async(access_purpose):
+        await asyncio.to_thread(create_temp_pbac_table, access_purpose)
+
+    access_purpose.change(update, inputs=[access_purpose], outputs=[
+                          access_purpose, msg, chatbot])
 
 
 if __name__ == "__main__":
