@@ -1,9 +1,11 @@
 import logging
+import sqlite3
+import pandas as pd
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 
-from config import DB_PATH, PURPOSES_v2
+from config import DB_PATH, PURPOSES
 
 from db import MedicalRecord, PBACMedicalRecord
 
@@ -75,7 +77,7 @@ def execute_text_query(session, query):
 
 def create_temp_pbac_table(access_purpose):
     try:
-        access_code = PURPOSES_v2.get(access_purpose).get('code')
+        access_code = PURPOSES.get(access_purpose).get('code')
         session = get_session()
         all = session.query(MedicalRecord).all()
         filter_and_insert_records(session, all, access_code)
@@ -133,6 +135,27 @@ def filter_and_insert_records(session, records, access_code):
         # Rollback the session if an error occurs
         session.rollback()
         print("An error occurred:", str(e))
+
+
+def create_sql_db():
+    # Step 1: Load your CSV data into a pandas DataFrame
+    csv_file_path = 'ex_ante/california_fake.csv'
+    df = pd.read_csv(csv_file_path)
+    print(df.head())
+
+    # Step 2: Create a SQLite database connection
+    database_path = 'sqlite_medical_neo.db'
+    conn = sqlite3.connect(database_path)
+
+    # Step 3: Write the data into the SQLite database
+    table_name = 'medical_data'  # Name the table in which to store the data
+    df.to_sql(table_name, conn, if_exists='replace', index=False)
+
+    # Close the database connection
+    conn.close()
+
+    print(f"Data from {csv_file_path} has been written to {
+          database_path} in the table {table_name}.")
 
 
 if __name__ == "__main__":

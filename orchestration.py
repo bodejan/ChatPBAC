@@ -8,7 +8,7 @@ from langchain_core.prompts import (
 from dotenv import load_dotenv
 import logging
 
-from retrieval import decide_retrieval, retrieve_data_v2
+from retrieval import decide_retrieval, retrieve_data
 from llm import extend_chat_history, format_chat_history, get_user_context_prompt
 
 load_dotenv()
@@ -22,7 +22,7 @@ def orchestrate(user_prompt: str, chatbot: RunnableWithMessageHistory, chat_hist
         logger.info(f'Access purpose provided by user: {access_purpose}')
 
         # Retrieve data
-        retrieval_response = retrieve_data_v2(user_prompt, access_purpose)
+        retrieval_response = retrieve_data(user_prompt, access_purpose)
         query = retrieval_response.get('query')
         results = retrieval_response.get('results')
 

@@ -4,7 +4,7 @@ from langchain_core.prompts import PromptTemplate
 
 import logging
 
-from config import DB_CONTEXT, DB_PATH, PURPOSES_v2
+from config import DB_CONTEXT, DB_PATH, PURPOSES
 from db_utils import *
 from db import Base, PBACMedicalRecord
 
@@ -29,8 +29,8 @@ Question: {user_prompt}
 SQL Query:"""
 
 
-def retrieve_data_v2(user_prompt: str, access_purpose: str):
-    if access_purpose not in list(PURPOSES_v2.keys()):
+def retrieve_data(user_prompt: str, access_purpose: str):
+    if access_purpose not in list(PURPOSES.keys()):
         return {'query': 'None', 'results': 'Unable to retrieve data. Please provide a valid access purpose.'}
 
     try:
@@ -99,5 +99,5 @@ Classification:
 
 
 if __name__ == '__main__':
-    print(retrieve_data_v2(
+    print(retrieve_data(
         "Retrieve the name for the following ID: MN16-22639", "Research"))

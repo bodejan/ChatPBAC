@@ -1,7 +1,7 @@
 from llm import init_chat
 import gradio as gr
 
-from config import PURPOSES_v2
+from config import PURPOSES
 from orchestration import orchestrate
 from retrieval import create_temp_pbac_table
 
@@ -19,7 +19,7 @@ with gr.Blocks(
     )
 
     access_purpose = gr.Dropdown(
-        choices=list(PURPOSES_v2.keys()), interactive=True, label='Data Access Purpose')
+        choices=list(PURPOSES.keys()), interactive=True, label='Data Access Purpose')
 
     def update(access_purpose):
         create_temp_pbac_table(access_purpose)

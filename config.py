@@ -32,7 +32,7 @@ Columns:
   - consulting_physician (VARCHAR): Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']
   """
 
-PURPOSES_v2 = {
+PURPOSES = {
     "General-Purpose": {
         "id": 1,
         "parent_id": None,

@@ -19,6 +19,7 @@ def init_chat():
         "You are a helpful assistant. Answer all questions to the best of your ability. "
         "You have access to an SQL database. "
         f"Database description: {DB_CONTEXT}"
+        # "If you include query results in your response, please format them as a table and make the table scrollable."
     )
 
     prompt = ChatPromptTemplate.from_messages(
