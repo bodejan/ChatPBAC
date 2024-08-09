@@ -44,7 +44,8 @@ with gr.Blocks(
         [msg, chatbot, access_purpose])
 
     async def update(access_purpose):
-        asyncio.create_task(create_temp_pbac_table_async(access_purpose))
+        asyncio.create_task(asyncio.to_thread(
+            create_temp_pbac_table, access_purpose))
         return access_purpose, None, None
 
     async def create_temp_pbac_table_async(access_purpose):
