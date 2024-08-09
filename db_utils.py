@@ -47,8 +47,7 @@ def get_table_info(base, include):
         structured_string += f"Description: {info['description']}\n"
         structured_string += "Columns:\n"
         for column_name, column_info in info['columns'].items():
-            structured_string += f"  - {column_name} ({column_info['type']}): {
-                column_info['description']}\n"
+            structured_string += f"  - {column_name} ({column_info['type']}): {column_info['description']}\n"
         structured_string += "\n"
 
     return structured_string
@@ -154,8 +153,7 @@ def create_sql_db():
     # Close the database connection
     conn.close()
 
-    print(f"Data from {csv_file_path} has been written to {
-          database_path} in the table {table_name}.")
+    print(f"Data from {csv_file_path} has been written to {database_path} in the table {table_name}.")
 
 
 if __name__ == "__main__":
