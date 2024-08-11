@@ -44,10 +44,22 @@ def count(query):
 
     return count
 
+def aggregate(pipeline):
+    client = connect()
+    db = client.get_database(os.getenv("DB_NAME"))
+    collection = db.get_collection(os.getenv("DB_COLLECTION"))
+
+    results = collection.aggregate(pipeline)
+    results = list(results)
+    client.close()
+
+    return results
+
 
 def close(client):
     client.close()
 
 
 if __name__ == "__main__":
-    pass
+    pipeline= [{'$group': {'_id': '$ReportYear', 'count': {'$sum': 1}}}]
+    print(aggregate(pipeline))
