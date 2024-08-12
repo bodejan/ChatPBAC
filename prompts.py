@@ -30,36 +30,47 @@ Only use the following collection:
 {collection_info}
 
 Provide a NoSQL action: 'find', 'countDocuments', or 'aggregate' and a query.
-Use JSON format.
+Use JSON format. Use double quotation marks for keys and values.
 """
 
 RETRIEVAL_EXAMPLES = [
-    {"input": "Retrieve all records where the Diagnosis is 'Cancer'", 
-     "output": """{'action': 'find', 'query': {'DiagnosisCategory': 'Cancer'}}"""},
-     
-    {"input": "Fetch the record with ID 'MN02-2799'", 
-     "output": """{'action': 'find', 'query': {'ReferenceID': 'MN02-2799'}}"""},
-
-    {"input": "What is the most common age range in the dataset?", 
-     "output": """{'action': 'aggregate', 'query': [{'$group': {'_id': '$AgeRange', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}}, {'$limit': 1}]}"""},
-
-    {"input": "Show me all records where the Treatment is 'Pharmacy'", 
-     "output": """{'action': 'find', 'query': {'TreatmentCategory': 'Pharmacy'}}"""},
-
-    {"input": "How many patients are covered by Medicaid?", 
-     "output": """{'action': 'countDocuments', 'query': {'PatientInsuranceProvider': 'Medicaid'}}"""},
-
-    {"input": "How many records are there for patients aged 51 to 64?", 
-     "output": """{'action': 'countDocuments', 'query': {'AgeRange': '51 to 64'}}"""},
-
-    {"input": "Retrieve all entries where the Determination is Overturned", 
-     "output": """{'action': 'find', 'query': {'Determination': 'Overturned Decision of Health Plan'}}"""},
-
-    {"input": "Show the count of records for each ReportYear", 
-     "output": """{'action': 'aggregate', 'query': [{'$group': {'_id': '$ReportYear', 'count': {'$sum': 1}}}]}"""},
-
-    {"input": "Give me the data for patients with the blood type 'O+'", 
-     "output": """{'action': 'find', 'query': {'PatientBloodType': 'O+'}}"""}
+    {
+        "input": "Retrieve all records where the Diagnosis is 'Cancer'", 
+        "output": "{\"action\": \"find\", \"query\": {\"DiagnosisCategory\": \"Cancer\"}}"
+    },
+    {
+        "input": "Fetch the record with ID 'MN02-2799'", 
+        "output": "{\"action\": \"find\", \"query\": {\"ReferenceID\": \"MN02-2799\"}}"
+    },
+    {
+        "input": "What is the most common age range in the dataset?", 
+        "output": "{\"action\": \"aggregate\", \"query\": [{\"$group\": {\"_id\": \"$AgeRange\", \"count\": {\"$sum\": 1}}}, {\"$sort\": {\"count\": -1}}, {\"$limit\": 1}]}"
+    },
+    {
+        "input": "Show me all records where the Treatment is 'Pharmacy'", 
+        "output": "{\"action\": \"find\", \"query\": {\"TreatmentCategory\": \"Pharmacy\"}}"
+    },
+    {
+        "input": "How many patients are covered by Medicaid?", 
+        "output": "{\"action\": \"countDocuments\", \"query\": {\"PatientInsuranceProvider\": \"Medicaid\"}}"
+    },
+    {
+        "input": "How many records are there for patients aged 51 to 64?", 
+        "output": "{\"action\": \"countDocuments\", \"query\": {\"AgeRange\": \"51 to 64\"}}"
+    },
+    {
+        "input": "Retrieve all entries where the Determination is Overturned", 
+        "output": "{\"action\": \"find\", \"query\": {\"Determination\": \"Overturned Decision of Health Plan\"}}"
+    },
+    {
+        "input": "Show the count of records for each ReportYear", 
+        "output": "{\"action\": \"aggregate\", \"query\": [{\"$group\": {\"_id\": \"$ReportYear\", \"count\": {\"$sum\": 1}}}]}"
+    },
+    {
+        "input": "Give me the data for patients with the blood type 'O+'", 
+        "output": "{\"action\": \"find\", \"query\": {\"PatientBloodType\": \"O+\"}}"
+    }
 ]
+
 
 

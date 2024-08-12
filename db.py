@@ -55,6 +55,16 @@ def aggregate(pipeline):
 
     return results
 
+def execute_query(query, action, k: int = 5):
+    if action == 'find':
+        return find(query, k)
+    elif action == 'countDocuments':
+        return count(query)
+    elif action == 'aggregate':
+        return aggregate(query)
+    else:
+        return None
+
 
 def close(client):
     client.close()

@@ -18,7 +18,7 @@ from prompts import (
     RETRIEVAL_SYSTEM,
     RETRIEVAL_EXAMPLES
 )
-import ast
+import json
 
 dotenv.load_dotenv()
 
@@ -59,7 +59,8 @@ def decide_retrieval(user_prompt: str):
 
 def write_nosql_query(user_prompt: str):
     def parse(output: str):
-        output_dict = ast.literal_eval(output)
+        print(output)
+        output_dict = json.loads(output)
         return output_dict
     
     example_prompt = ChatPromptTemplate.from_messages(
@@ -84,7 +85,8 @@ def write_nosql_query(user_prompt: str):
         ]
     )
 
-    llm = ChatOpenAI(temperature=0, model='gpt-4o', model_kwargs={"response_format": {"type": "json_object"}})
+    #llm = ChatOpenAI(temperature=0, model='gpt-4o', model_kwargs={"response_format": {"type": "json_object"}})
+    llm = ChatOpenAI(temperature=0, model='gpt-4o')
     chain = final_prompt | llm
     output = chain.invoke(user_prompt).content
     output_dict = parse(output)
@@ -92,6 +94,6 @@ def write_nosql_query(user_prompt: str):
     return output_dict.get('action'), output_dict.get('query')
 
 
-
-#print(decide_retrieval("Please summarize your response"))
-#print(write_nosql_query("Retrieve all records where the Diagnosis is 'Cancer'"))
+if __name__ == "__main__":
+    print(decide_retrieval("Please summarize your response"))
+    print(write_nosql_query("Retrieve all records where the Diagnosis is 'Cancer'"))

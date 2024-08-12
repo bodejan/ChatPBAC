@@ -98,7 +98,7 @@ def filter_all(visits: list, access_code: int, query: dict):
     
     return filtered_visits, {'masked_fields': masked_fields, 'excluded_documents': excluded_documents}
 
-def run(documents: list, access_code: int, query: dict):
+def run_pbac(documents: list, access_code: int, query: dict):
     visits = convert_all(documents)
     filtered_visits, report = filter_all(visits, access_code, query)
     return filtered_visits, report
@@ -107,7 +107,7 @@ def run(documents: list, access_code: int, query: dict):
 if __name__ == "__main__":
     query = {"DiagnosisSubCategory": 'Obesity'}
     docs = find(query, 100)
-    docs, report = run(docs, 2048, query)
+    docs, report = run_pbac(docs, 2048, query)
     print(report)
     for doc in docs:
         print('---------------------------------')
