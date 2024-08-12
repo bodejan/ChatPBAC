@@ -49,9 +49,6 @@ All documents in the collection follow the same schema and have the following ke
  - ConsultingPhysician_IP: List of intended purposes (IP) for the ConsultingPhysician field.
 """
 
-
-DB_PATH = 'sqlite:///medical_database.db'
-
 GRADIO_PURPOSES = [
     ("General-Purpose", "General-Purpose"),
     ("|--- Clinical-Care", "Clinical-Care"), 

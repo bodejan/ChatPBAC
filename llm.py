@@ -109,7 +109,7 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1):
     if output_dict.get('limit'):
         logger.info(f"Limit: {output_dict.get('limit')}")
 
-    return Context(action=output_dict.get('action'), query=output_dict.get('query'))
+    return Context(action=output_dict.get('action'), query=output_dict.get('query'), limit=output_dict.get('limit'))
 
 def chat(user_prompt: str, chat_history: list = [], context: Context = Context()):
     chat = ChatOpenAI(temperature=0.2)
