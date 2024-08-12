@@ -132,11 +132,12 @@ class Purpose:
 
 
 class Context:
-    def __init__(self, action = None, query = None, result = [], masked = None):
+    def __init__(self, action = None, query = None, result = [], masked = None, limit = None):
         self.action = action
         self.query = query
         self.result = result
         self.masked = masked
+        self.limit = limit
 
     def __repr__(self):
         return f'Query: {self.query}, Result: {self.result}'

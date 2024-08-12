@@ -68,7 +68,7 @@ def decide_retrieval(user_prompt: str):
     logger.info(f"Retrieval Decision: {response}")
     return response
 
-def write_nosql_query(user_prompt: str, access_purpose: str):
+def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1):
 
     def parse(output: str):
         output_dict = json.loads(output)
@@ -88,7 +88,7 @@ def write_nosql_query(user_prompt: str, access_purpose: str):
         examples=RETRIEVAL_EXAMPLES,
     )
     system_prompt = PromptTemplate(
-        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO}
+        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": k}
     ).format()
 
     final_prompt = ChatPromptTemplate.from_messages(
@@ -106,6 +106,8 @@ def write_nosql_query(user_prompt: str, access_purpose: str):
 
     logger.info(f"NoSQL Action: {output_dict.get('action')}")
     logger.info(f"NoSQL Query: {output_dict.get('query')}")
+    if output_dict.get('limit'):
+        logger.info(f"Limit: {output_dict.get('limit')}")
 
     return Context(action=output_dict.get('action'), query=output_dict.get('query'))
 

@@ -25,12 +25,11 @@ def test():
     close(client)
 
 
-def find(query, k: int = 10):
+def find(query: dict, k: int):
     client = connect()
     db = client.get_database(os.getenv("DB_NAME"))
     collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
-
-    results = collection.find(query, {"_id": 0}).limit(k)
+    results = collection.find(query).limit(k)
     results = list(results)
     client.close()
 
@@ -60,12 +59,14 @@ def aggregate(pipeline):
 
 def execute_query(context: Context, k: int = 5):
     if context.action == 'find':
+        if context.limit:
+            k = context.limit
         context.result = find(context.query, k)
     elif context.action == 'countDocuments':
         context.result = count(context.query)
     elif context.action == 'aggregate':
         context.result = aggregate(context.query)
-    logger.info(f"Retrieval Result: {context.result}")
+    logger.info(f"# Retrieval Results: {len(context.result)}")
     return context
 
 
