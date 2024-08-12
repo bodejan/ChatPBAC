@@ -25,7 +25,7 @@ def test():
 def find(query, k: int = 10):
     client = connect()
     db = client.get_database(os.getenv("DB_NAME"))
-    collection = db.get_collection(os.getenv("DB_COLLECTION"))
+    collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
 
     results = collection.find(query, {"_id": 0}).limit(k)
     results = list(results)
@@ -37,7 +37,7 @@ def find(query, k: int = 10):
 def count(query):
     client = connect()
     db = client.get_database(os.getenv("DB_NAME"))
-    collection = db.get_collection(os.getenv("DB_COLLECTION"))
+    collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
 
     count = collection.count_documents(query)
     client.close()
@@ -47,7 +47,7 @@ def count(query):
 def aggregate(pipeline):
     client = connect()
     db = client.get_database(os.getenv("DB_NAME"))
-    collection = db.get_collection(os.getenv("DB_COLLECTION"))
+    collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
 
     results = collection.aggregate(pipeline)
     results = list(results)
