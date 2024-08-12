@@ -1,20 +1,28 @@
 from db import execute_query
-from llm2 import decide_retrieval, write_nosql_query
-from pbac import run_pbac
+from llm2 import decide_retrieval, write_nosql_query, chat
+from pbac import filter
+from model import Context
 
+def run(user_input: str, chat_history: list = [], access_purpose: str = None):
 
-user_input_1 = "What is the most common age range of patients with diabetes?"
-user_input_2 = "Retrieve all records where the Diagnosis is 'Cancer'"
+    if access_purpose is None:
+        return "Please provide an access purpose.", chat_history, Context()
 
-if decide_retrieval(user_input_1):
-    access_purpose= 'Research'
-    action, query = write_nosql_query(user_input_1, access_purpose)
-    results = execute_query(query, action, 2)
-    if action == 'find':
-        filtered = run_pbac(results, access_purpose)
-        print(filtered[1])
-        for item in filtered[0]:
-            print(item)
+    # Decide if retrieval is necessary
+    if decide_retrieval(user_input) == 'True':
+        # Retrieve data
+        nosql_context = write_nosql_query(user_input, access_purpose)
+        nosql_result_context = execute_query(nosql_context)
+        nosql_result_filtered_context = filter(nosql_result_context, access_purpose)
+        response, chat_history, final_context = chat(user_input, [], nosql_result_filtered_context)
     else:
-        print(results)
-        
+        response, chat_history, final_context = chat(user_input, chat_history)
+
+    return response, chat_history, final_context
+
+
+if __name__ == "__main__":
+    access_purpose = "Research"
+    user_input_1 = "What is the most common age range of patients with diabetes?"
+    user_input_2 = "Retrieve all records where the Diagnosis is 'Cancer'"
+    _, _, _ = run(user_input_1, [], access_purpose)

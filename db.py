@@ -2,8 +2,11 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from dotenv import load_dotenv
 import os
+from model import Context
+import logging
 
 load_dotenv()
+logger = logging.getLogger()
 
 def connect():
     # Create a new client and connect to the server
@@ -55,15 +58,15 @@ def aggregate(pipeline):
 
     return results
 
-def execute_query(query, action, k: int = 5):
-    if action == 'find':
-        return find(query, k)
-    elif action == 'countDocuments':
-        return count(query)
-    elif action == 'aggregate':
-        return aggregate(query)
-    else:
-        return None
+def execute_query(context: Context, k: int = 5):
+    if context.action == 'find':
+        context.result = find(context.query, k)
+    elif context.action == 'countDocuments':
+        context.result = count(context.query)
+    elif context.action == 'aggregate':
+        context.result = aggregate(context.query)
+    logger.info(f"Retrieval Result: {context.result}")
+    return context
 
 
 def close(client):

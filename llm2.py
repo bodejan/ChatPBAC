@@ -5,6 +5,11 @@ from langchain_core.prompts import (
     FewShotChatMessagePromptTemplate,
     MessagesPlaceholder
 )
+from langchain_core.messages import (
+    AIMessage,
+    HumanMessage
+)
+
 import logging
 import dotenv
 from config import (
@@ -20,6 +25,10 @@ from prompts import (
     RETRIEVAL_EXAMPLES,
     CHAT_SYSTEM
 )
+
+
+from model import Context
+
 import json
 
 dotenv.load_dotenv()
@@ -60,9 +69,8 @@ def decide_retrieval(user_prompt: str):
     return response
 
 def write_nosql_query(user_prompt: str, access_purpose: str):
-    
+
     def parse(output: str):
-        print(output)
         output_dict = json.loads(output)
         return output_dict
     
@@ -96,9 +104,12 @@ def write_nosql_query(user_prompt: str, access_purpose: str):
     output = chain.invoke(append_access_purpose(user_prompt, access_purpose)).content
     output_dict = parse(output)
 
-    return output_dict.get('action'), output_dict.get('query')
+    logger.info(f"NoSQL Action: {output_dict.get('action')}")
+    logger.info(f"NoSQL Query: {output_dict.get('query')}")
 
-def chat(user_prompt: str, chat_history: list = [], context: str = None):
+    return Context(action=output_dict.get('action'), query=output_dict.get('query'))
+
+def chat(user_prompt: str, chat_history: list = [], context: Context = Context()):
     chat = ChatOpenAI(temperature=0.2)
 
     prompt = ChatPromptTemplate.from_messages(
@@ -110,12 +121,14 @@ def chat(user_prompt: str, chat_history: list = [], context: str = None):
     )
 
     chain = prompt | chat
-    response = chain.invoke({
-        {"input": user_prompt, "chat_history": chat_history, "context": context}
-    })
-    print(response)
+    response = chain.invoke(
+        {"input": user_prompt, "chat_history": chat_history, "context": context, "db_context": DB_CONTEXT}).content
+    
+    logger.info(f"Chat Response: {response}")
+    
+    chat_history.extend([HumanMessage(content=user_prompt), AIMessage(content=response)])
 
-    return response
+    return response, chat_history, context
 
 
 if __name__ == "__main__":

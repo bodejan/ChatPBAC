@@ -82,51 +82,10 @@ class VisitModel:
         self.ConsultingPhysician_IP = ConsultingPhysician_IP
 
     def to_dict_all(self):
-        """Return a dictionary without the Intended Purpose fields."""
-        return {
-            "ReferenceID": self.ReferenceID,
-            "ReportYear": self.ReportYear,
-            "DiagnosisCategory": self.DiagnosisCategory,
-            "DiagnosisSubCategory": self.DiagnosisSubCategory,
-            "TreatmentCategory": self.TreatmentCategory,
-            "TreatmentSubCategory": self.TreatmentSubCategory,
-            "Determination": self.Determination,
-            "Type": self.Type,
-            "AgeRange": self.AgeRange,
-            "PatientGender": self.PatientGender,
-            "Findings": self.Findings,
-            "PatientName": self.PatientName,
-            "PatientAge": self.PatientAge,
-            "PatientPhone": self.PatientPhone,
-            "PatientAddress": self.PatientAddress,
-            "PatientBloodType": self.PatientBloodType,
-            "PatientSSN": self.PatientSSN,
-            "PatientInsuranceProvider": self.PatientInsuranceProvider,
-            "PatientInsuranceNumber": self.PatientInsuranceNumber,
-            "ConsultingPhysician": self.ConsultingPhysician,
-            # IP (Intended Purpose) Fields
-            "ReportYear_IP": self.ReportYear_IP,
-            "DiagnosisCategory_IP": self.DiagnosisCategory_IP,
-            "DiagnosisSubCategory_IP": self.DiagnosisSubCategory_IP,
-            "TreatmentCategory_IP": self.TreatmentCategory_IP,
-            "TreatmentSubCategory_IP": self.TreatmentSubCategory_IP,
-            "Determination_IP": self.Determination_IP,
-            "Type_IP": self.Type_IP,
-            "AgeRange_IP": self.AgeRange_IP,
-            "PatientGender_IP": self.PatientGender_IP,
-            "Findings_IP": self.Findings_IP,
-            "PatientName_IP": self.PatientName_IP,
-            "PatientAge_IP": self.PatientAge_IP,
-            "PatientPhone_IP": self.PatientPhone_IP,
-            "PatientAddress_IP": self.PatientAddress_IP,
-            "PatientBloodType_IP": self.PatientBloodType_IP,
-            "PatientSSN_IP": self.PatientSSN_IP,
-            "PatientInsuranceProvider_IP": self.PatientInsuranceProvider_IP,
-            "PatientInsuranceNumber_IP": self.PatientInsuranceNumber_IP,
-            "ConsultingPhysician_IP": self.ConsultingPhysician_IP
-        }
+        return str(self.__dict__)
     
     def to_dict(self):
+        """Return a dictionary without the Intended Purpose fields."""
         return {
             "ReferenceID": self.ReferenceID,
             "ReportYear": self.ReportYear,
@@ -166,3 +125,15 @@ class Purpose:
         self.code = code
         self.aip_code = aip_code
         self.pip_code = pip_code
+
+
+
+class Context:
+    def __init__(self, action = None, query = None, result = [], masked = None):
+        self.action = action
+        self.query = query
+        self.result = result
+        self.masked = masked
+
+    def __repr__(self):
+        return f'Query: {self.query}, Result: {self.result}'

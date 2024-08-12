@@ -1,4 +1,4 @@
-from model import VisitModel
+from model import VisitModel, Context
 from db import find
 
 def convert(document: dict):
@@ -74,27 +74,32 @@ def mask(visit: VisitModel, access_purpose: str):
 
 
 def mask_all(visits: list, access_purpose: str):
-    filtered_visits = []
+    masked_visits = []
     total_masked_fields = 0
     
     for visit in visits:
-        filtered_visit, masked_fields = mask(visit, access_purpose)
-        filtered_visits.append(filtered_visit)
+        masked_visit, masked_fields = mask(visit, access_purpose)
+        masked_visits.append(masked_visit)
         total_masked_fields += masked_fields
     
-    return filtered_visits, {'masked_fields': total_masked_fields}
+    return masked_visits, total_masked_fields
 
 
-def run_pbac(documents: list, access_purpose: str):
-    visits = convert_all(documents)
-    filtered_visits, report = mask_all(visits, access_purpose)
-    return filtered_visits, report
+def filter(context: Context, access_purpose: str):
+    if context.action == 'find':
+        visits = convert_all(context.result)
+        filtered_visits, total_masked_fields = mask_all(visits, access_purpose)
+        context.result = filtered_visits
+        context.masked = total_masked_fields
+        return context
+    else:
+        return context
 
         
 if __name__ == "__main__":
     query = {"DiagnosisSubCategory": 'Obesity'}
     docs = find(query, 100)
-    docs, report = run_pbac(docs, 2048, query)
+    docs, report = filter(docs, 2048, query)
     print(report)
     for doc in docs:
         print('---------------------------------')
