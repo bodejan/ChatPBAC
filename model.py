@@ -1,3 +1,6 @@
+import json
+
+
 class VisitModel:
     def __init__(self, 
                  ReferenceID=None, 
@@ -110,10 +113,10 @@ class VisitModel:
         }
 
     def __repr__(self):
-        return str(self.to_dict())
+        return json.dumps(self.to_dict(), indent=4)
 
     def __str__(self):
-        return str(self.to_dict())
+        return json.dumps(self.to_dict(), indent=4)
 
 
 

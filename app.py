@@ -1,15 +1,14 @@
-from llm import init_chat
 import gradio as gr
+from gradio import ChatMessage
 import asyncio
+from langchain.schema import AIMessage, HumanMessage
+from run import run
 
-from config import PURPOSES
-from orchestration import orchestrate
-from retrieval import create_temp_pbac_table
-
-llm = init_chat()
+from config import GRADIO_PURPOSES
 
 with gr.Blocks(
     title="PBAC-enhanced Chatbot",
+    css=".content {text-align: left;}"
 ) as chat_app:
 
     gr.Markdown(
@@ -20,39 +19,34 @@ with gr.Blocks(
     )
 
     access_purpose = gr.Dropdown(
-        choices=list(PURPOSES.keys()), interactive=True, label='Data Access Purpose')
-
-    chatbot = gr.Chatbot(show_copy_button=True)
+        choices=GRADIO_PURPOSES, interactive=True, label='Data Access Purpose', value='General-Purpose')
+    
+    chatbot = gr.Chatbot(type="messages", show_copy_button=True, bubble_full_width=False, likeable=True, elem_classes=["style='text-align: left;"])
     msg = gr.Textbox()
+    clear = gr.ClearButton([msg, chatbot])
+    
+    def predict(message, history, access_purpose):
+        history_langchain_format = []
+        print(history)
+        for m in history:
+            if m.get('role') == "user":
+                history_langchain_format.append(HumanMessage(content=m.get("content")))
+            elif m.get('role') == "assistant" and m.get('content') != "":
+                history_langchain_format.append(AIMessage(content=m.get("content")))
+        history_langchain_format.append(HumanMessage(content=message))
+        response, context = run(user_input=message, chat_history=history_langchain_format, access_purpose=access_purpose)
+        history.append(ChatMessage(role="user", content=message))
 
-    def respond(message, chat_history, access_purpose):
-        if access_purpose is None:
-            chat_history.append(
-                (message, 'Please provide a "Data Access Purpose".'))
-            return "", chat_history
+        if context.action:
+            history.append(ChatMessage(role="assistant", content=f"query: <code>{context.action} {context.query}</code>\nresult: <code>{context.result}</code>", metadata={"title": f"🔍 Retrieval"}))
+            history.append(ChatMessage(role="assistant", content=response))
         else:
-            response = orchestrate(
-                message, llm, chat_history, access_purpose)
-            chat_history = response.get('chat_history')
+            history.append(ChatMessage(role="assistant", content=response))
 
-        return "", chat_history
+        return "", history
 
-    msg.submit(respond, [msg, chatbot, access_purpose],
-               [msg, chatbot])
 
-    clear = gr.ClearButton(
-        [msg, chatbot, access_purpose])
-
-    async def update(access_purpose):
-        asyncio.create_task(asyncio.to_thread(
-            create_temp_pbac_table, access_purpose))
-        return access_purpose, None, None
-
-    async def create_temp_pbac_table_async(access_purpose):
-        await asyncio.to_thread(create_temp_pbac_table, access_purpose)
-
-    access_purpose.change(update, inputs=[access_purpose], outputs=[
-                          access_purpose, msg, chatbot])
+    msg.submit(predict, [msg, chatbot, access_purpose], [msg, chatbot])
 
 
 if __name__ == "__main__":

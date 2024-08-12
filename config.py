@@ -80,118 +80,43 @@ Columns:
   - consulting_physician (VARCHAR): Physician who consulted on the case, available options: ['Dr. Jerry Daniels' 'Dr. Eddie Young' 'Dr. Michelle Lamb' 'Dr. Shelly Hunt' 'Dr. Alexandria Gaines' 'Dr. James Barber']
   """
 
+GRADIO_PURPOSES = [
+    ("General-Purpose", "General-Purpose"),
+    ("|--- Clinical-Care", "Clinical-Care"), 
+    ("|--- Research", "Research"), 
+    ("|------- Public-Research", "Public-Research"), 
+    ("|----------- Military-Research", "Military-Research"), 
+    ("|----------- Non-Military-Research", "Non-Military-Research"), 
+    ("|------- Private-Research", "Private-Research"), 
+    ("|--- Patient-Support-Service", "Patient-Support-Service"), 
+    ("|------- Billing", "Billing"), 
+    ("|------- Communication", "Communication"), 
+    ("|--- Third-Party", "Third-Party"), 
+    ("|------- Marketing", "Marketing"), 
+    ("|------- Product-Development", "Product-Development")]
+
 PURPOSES = {
-    "General-Purpose": {
-        "id": 1,
-        "parent_id": None,
-        "code": 1,
-        "aip_code": 8191,
-        "pip_code": 8191,
-        "description": "Root access for all purposes."
-    },
-    "Clinical-Care": {
-        "id": 2,
-        "parent_id": 1,
-        "code": 2,
-        "aip_code": 2,
-        "pip_code": 3,
-        "description": "Data access for patient clinical care activities and treatment."
-    },
-    "Research": {
-        "id": 3,
-        "parent_id": 1,
-        "code": 4,
-        "aip_code": 124,
-        "pip_code": 125,
-        "description": "Data access for medical research including public and private."
-    },
-    "Public-Research": {
-        "id": 4,
-        "parent_id": 3,
-        "code": 8,
-        "aip_code": 56,
-        "pip_code": 61,
-        "description": "Data access for public research activities including military and non-military."
-    },
-    "Military-Research": {
-        "id": 5,
-        "parent_id": 4,
-        "code": 16,
-        "aip_code": 16,
-        "pip_code": 29,
-        "description": "Data access for military-related medical research."
-    },
-    "Non-Military-Research": {
-        "id": 6,
-        "parent_id": 4,
-        "code": 32,
-        "aip_code": 32,
-        "pip_code": 45,
-        "description": "Data access for non-military medical research purposes."
-    },
-    "Private-Research": {
-        "id": 7,
-        "parent_id": 3,
-        "code": 64,
-        "aip_code": 64,
-        "pip_code": 69,
-        "description": "Data access for private sector medical research."
-    },
-    "Patient-Support-Service": {
-        "id": 8,
-        "parent_id": 1,
-        "code": 128,
-        "aip_code": 896,
-        "pip_code": 897,
-        "description": "Data access for patient support services and care coordination."
-    },
-    "Billing": {
-        "id": 9,
-        "parent_id": 8,
-        "code": 256,
-        "aip_code": 256,
-        "pip_code": 385,
-        "description": "Data access for billing, insurance, and financial operations."
-    },
-    "Communication": {
-        "id": 10,
-        "parent_id": 8,
-        "code": 512,
-        "aip_code": 512,
-        "pip_code": 641,
-        "description": "Data access for patient and provider communication, e.g., scheduling appointments."
-    },
-    "Third-Party": {
-        "id": 11,
-        "parent_id": 1,
-        "code": 1024,
-        "aip_code": 7168,
-        "pip_code": 7169,
-        "description": "Data access for interactions with third-party medical service providers."
-    },
-    "Marketing": {
-        "id": 12,
-        "parent_id": 11,
-        "code": 2048,
-        "aip_code": 2048,
-        "pip_code": 3073,
-        "description": "Data access for medical marketing and promotional activities."
-    },
-    "Product-Development": {
-        "id": 13,
-        "parent_id": 11,
-        "code": 4096,
-        "aip_code": 4096,
-        "pip_code": 5121,
-        "description": "Data access for the development and testing of new third-party medical products and services."
-    },
-    "None": {
-        "description": "No specific access purpose identified."
-    },
-    "Error": {
-        "description": "An error occurred please retry."
-    }
+    "general_purpose": [
+        "General-Purpose", "Clinical-Care", "Research", "Public-Research", "Military-Research",
+        "Non-Military-Research", "Private-Research", "Patient-Support-Service", "Billing",
+        "Communication", "Third-Party", "Marketing", "Product-Development"
+    ],
+    "clinical_care": ["Clinical-Care"],
+    "research": [
+        "Research", "Public-Research", "Military-Research", "Non-Military-Research", "Private-Research"
+    ],
+    "public_research": ["Public-Research", "Military-Research", "Non-Military-Research"],
+    "private_research": ["Private-Research"],
+    "military_research": ["Military-Research"],
+    "non_military_research": ["Non-Military-Research"],
+    "patient_support_service": ["Patient-Support-Service", "Billing", "Communication"],
+    "billing": ["Billing"],
+    "communication": ["Communication"],
+    "third_party": ["Third-Party", "Marketing", "Product-Development"],
+    "marketing": ["Marketing"],
+    "product_development": ["Product-Development"]
 }
+
 
 
 logging.basicConfig(level=logging.INFO,

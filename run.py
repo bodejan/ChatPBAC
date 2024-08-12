@@ -2,9 +2,12 @@ from db import execute_query
 from llm2 import decide_retrieval, write_nosql_query, chat
 from pbac import filter
 from model import Context
+import logging
+
+logger = logging.getLogger()
 
 def run(user_input: str, chat_history: list = [], access_purpose: str = None):
-
+    logger.info(f"Start chat with user input: {user_input}, access purpose: {access_purpose}")
     if access_purpose is None:
         return "Please provide an access purpose.", chat_history, Context()
 
@@ -18,11 +21,13 @@ def run(user_input: str, chat_history: list = [], access_purpose: str = None):
     else:
         response, chat_history, final_context = chat(user_input, chat_history)
 
-    return response, chat_history, final_context
+    return response, final_context
 
 
 if __name__ == "__main__":
     access_purpose = "Research"
     user_input_1 = "What is the most common age range of patients with diabetes?"
     user_input_2 = "Retrieve all records where the Diagnosis is 'Cancer'"
-    _, _, _ = run(user_input_1, [], access_purpose)
+    _, _ = run(user_input_1, access_purpose)
+
+    
