@@ -1,5 +1,4 @@
 from model import VisitModel, Context
-from db import find
 
 def convert(document: dict):
     visit = VisitModel(
@@ -97,15 +96,7 @@ def filter(context: Context, access_purpose: str):
 
         
 if __name__ == "__main__":
-    query = {"DiagnosisSubCategory": 'Obesity'}
-    docs = find(query, 100)
-    docs, report = filter(docs, 2048, query)
-    print(report)
-    for doc in docs:
-        print('---------------------------------')
-        if doc:
-            print(doc.to_dict())
-
+    pass
     
 
 

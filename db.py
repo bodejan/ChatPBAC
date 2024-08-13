@@ -75,5 +75,4 @@ def close(client):
 
 
 if __name__ == "__main__":
-    pipeline= [{'$group': {'_id': '$ReportYear', 'count': {'$sum': 1}}}]
-    print(aggregate(pipeline))
+    pass

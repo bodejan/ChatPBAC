@@ -41,8 +41,11 @@ with gr.Blocks(
         history.append(ChatMessage(role="assistant", content=response))
 
         return "", history
+    
+    def clear_history():
+        return "", []
 
-
+    access_purpose.change(clear_history, None, [msg, chatbot])
     msg.submit(predict, [msg, chatbot, access_purpose], [msg, chatbot])
 
 

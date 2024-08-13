@@ -119,18 +119,6 @@ class VisitModel:
         return json.dumps(self.to_dict(), indent=4)
 
 
-
-class Purpose:
-    def __init__(self, name, id, parent_id, code, aip_code = 0, pip_code = 0):
-        self.name = name
-        self.id = id
-        self.parent_id = parent_id
-        self.code = code
-        self.aip_code = aip_code
-        self.pip_code = pip_code
-
-
-
 class Context:
     def __init__(self, action = None, query = None, result = [], masked = None, limit = None):
         self.action = action

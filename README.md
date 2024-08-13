@@ -51,13 +51,3 @@ pip install --no-cache-dir -r requirements.txt
 pip install --upgrade-strategy eager "optimum[openvino,nncf]"
 ```
 
-
-
-# TODOs
-
-2. Fix parallel memory issues
-3. Add instructions to gradio
-4. Add configs to gradio
-
-
-PROVIDE function input as such

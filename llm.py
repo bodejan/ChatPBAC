@@ -134,6 +134,4 @@ def chat(user_prompt: str, chat_history: list = [], context: Context = Context()
 
 
 if __name__ == "__main__":
-    #print(decide_retrieval("Please summarize your response"))
-    #print(write_nosql_query("Retrieve all records where the Diagnosis is 'Cancer'"))
-    chat("What is the average age of patients with diabetes?", [], context="")
+    pass

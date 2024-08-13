@@ -25,9 +25,6 @@ def run(user_input: str, chat_history: list = [], access_purpose: str = None):
 
 
 if __name__ == "__main__":
-    access_purpose = "Research"
-    user_input_1 = "What is the most common age range of patients with diabetes?"
-    user_input_2 = "Retrieve all records where the Diagnosis is 'Cancer'"
-    _, _ = run(user_input_1, access_purpose)
+   pass
 
     
