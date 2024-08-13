@@ -1,6 +1,5 @@
 import gradio as gr
 from gradio import ChatMessage
-import asyncio
 from langchain.schema import AIMessage, HumanMessage
 from run import run
 
@@ -27,7 +26,6 @@ with gr.Blocks(
     
     def predict(message, history, access_purpose):
         history_langchain_format = []
-        print(history)
         for m in history:
             if m.get('role') == "user":
                 history_langchain_format.append(HumanMessage(content=m.get("content")))
@@ -39,9 +37,8 @@ with gr.Blocks(
 
         if context.action:
             history.append(ChatMessage(role="assistant", content=f"query: <code>{context.action} {context.query}</code>\nresult: <code>{context.result}</code>", metadata={"title": f"🔍 Retrieval"}))
-            history.append(ChatMessage(role="assistant", content=response))
-        else:
-            history.append(ChatMessage(role="assistant", content=response))
+        
+        history.append(ChatMessage(role="assistant", content=response))
 
         return "", history
 

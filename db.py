@@ -66,7 +66,7 @@ def execute_query(context: Context, k: int = 5):
         context.result = count(context.query)
     elif context.action == 'aggregate':
         context.result = aggregate(context.query)
-    logger.info(f"# Retrieval Results: {len(context.result)}")
+    logger.info(f"# Retrieval Results: {context.result}")
     return context
 
 
