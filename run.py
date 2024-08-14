@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger()
 
 def run(user_input: str, chat_history: list = [], access_purpose: str = None):
-    logger.info(f"Start chat with user input: {user_input}, access purpose: {access_purpose}")
+    logger.info(f"Start chat with user input: {user_input}. Access purpose: {access_purpose}")
     if access_purpose is None:
         return "Please provide an access purpose.", chat_history, Context()
 
