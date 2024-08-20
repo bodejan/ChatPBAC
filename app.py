@@ -6,14 +6,13 @@ from run import run
 from config import GRADIO_PURPOSES
 
 with gr.Blocks(
-    title="PBAC-enhanced Chatbot",
+    title="PBAC-RAG Bot",
     css=".content {text-align: left;}"
 ) as chat_app:
 
     gr.Markdown(
-        "# PBAC-enhanced Chatbot\n" +
-        "This chatbot is designed to help you with your data access requests.\n" +
-        "Remember to provide your data access purpose and signal a desired retrieval with keywords like *retrieve*, *query*, or *search*.\n",
+        "This chatbot allows you to chat with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n" +
+        "Information on the extision of the dataset is available [here](https://github.com/bodejan/california-imr-pii): .\n",
         line_breaks=True
     )
 
