@@ -1,7 +1,12 @@
 # Custom 
 medical_database.db
-faker/
-ex_ante/
+ex_ante/california.csv
+ex_ante/california_fake_data.csv
+ex_ante/california_fake.csv
+sqlite_medical.db
+chroma_medical_db/chroma.sqlite3
+chroma_medical_qa_db/chroma.sqlite3
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
