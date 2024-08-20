@@ -1,15 +1,7 @@
 langchain
 langchain_experimental
-chromadb==0.4.14
-pandas
 langchain_openai
-lark
+pandas
 python-dotenv
-faker
-tabulate
-huggingface_hub
-transformers
-sentence_transformers
 gradio
-flash_attn
 pymongo
