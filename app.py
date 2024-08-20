@@ -12,7 +12,7 @@ with gr.Blocks(
 
     gr.Markdown(
         "This chatbot allows you to chat with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n" +
-        "Information on the extision of the dataset is available [here](https://github.com/bodejan/california-imr-pii): .\n",
+        "Information on the extision of the dataset is available [here](https://github.com/bodejan/california-imr-pii).\n",
         line_breaks=True
     )
 
