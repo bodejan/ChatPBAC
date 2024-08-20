@@ -1,3 +1,8 @@
+# Custom 
+medical_database.db
+faker/
+ex_ante/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
