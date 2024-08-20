@@ -50,4 +50,4 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    chat_app.launch()
+    chat_app.launch(share=True)

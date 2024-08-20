@@ -34,11 +34,13 @@ Always include the access purpose in the query and make sure it matches the inte
 Only use the following collection:
 {collection_info}
 
-Provide a NoSQL action: Literal['find', 'countDocuments', 'aggregate'].
-Provide a NoSQL query.
-Provide a limit if the user asks for a specific number of results.
-Use JSON format. Use double quotation marks for keys and text values.
-Let's think step by step
+Provide a 'justification' for results, think step by step: str.
+Provide a NoSQL 'action': Literal['find', 'countDocuments', 'aggregate'].
+Provide a NoSQL 'query': Dict[str, Any].
+Provide a 'limit': Optional[int], default={k}.
+
+Use JSON format. 
+Use double quotation marks for keys and text values.
 """
 
 RETRIEVAL_EXAMPLES = [
