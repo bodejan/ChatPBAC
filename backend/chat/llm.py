@@ -9,7 +9,7 @@ from langchain_core.messages import (
 )
 import logging
 import dotenv
-from backend.config.config import (
+from backend.config.const import (
     DB_CONTEXT,
 )
 
