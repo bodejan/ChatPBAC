@@ -1,9 +1,13 @@
 import gradio as gr
 from gradio import ChatMessage
 from langchain.schema import AIMessage, HumanMessage
-from run import run
+from dotenv import load_dotenv
+import os
 
+from run import run
 from config import GRADIO_PURPOSES
+
+load_dotenv()
 
 with gr.Blocks(
     title="PBAC-RAG Bot",
@@ -50,4 +54,5 @@ with gr.Blocks(
 
 
 if __name__ == "__main__":
-    chat_app.launch(share=False)
+    chat_app.launch()
+    #chat_app.launch(auth=(os.getenv("GRADIO_USERNAME"), os.getenv("GRADIO_PASSWORD")))
