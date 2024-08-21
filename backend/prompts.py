@@ -1,4 +1,4 @@
-from config import DB_CONTEXT
+from backend.config import DB_CONTEXT
 
 DECIDE_RETRIEVAL_SYSTEM = """You are an AI model trained to identify whether a given text input contains a request for data retrieval.
 A data retrieval request is any inquiry that seeks to obtain specific information, facts, or data.

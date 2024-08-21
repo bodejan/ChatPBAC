@@ -1,4 +1,4 @@
-from model import VisitModel, Context
+from backend.model import VisitModel, Context
 
 def convert(document: dict):
     visit = VisitModel(

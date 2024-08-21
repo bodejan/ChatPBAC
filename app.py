@@ -4,8 +4,8 @@ from langchain.schema import AIMessage, HumanMessage
 from dotenv import load_dotenv
 import os
 
-from run import run
-from config import GRADIO_PURPOSES
+from backend.run import run
+from backend.config import GRADIO_PURPOSES
 
 load_dotenv()
 

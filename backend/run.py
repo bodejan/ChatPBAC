@@ -1,7 +1,7 @@
-from db import execute_query
-from llm import decide_retrieval, write_nosql_query, chat
-from pbac import filter
-from model import Context
+from backend.db import execute_query
+from backend.llm import decide_retrieval, write_nosql_query, chat
+from backend.pbac import filter
+from backend.model import Context
 import logging
 
 logger = logging.getLogger()
@@ -24,7 +24,11 @@ def run(user_input: str, chat_history: list = [], access_purpose: str = None):
     return response, final_context
 
 
+def test():
+    print(run('Hi', [], 'Research'))
+
+
 if __name__ == "__main__":
-   pass
+   test()
 
     

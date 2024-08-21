@@ -12,13 +12,13 @@ from langchain_core.messages import (
 
 import logging
 import dotenv
-from config import (
+from backend.config import (
     DB_CONTEXT,
     DB_DIALECT,
     DB_COLLECTION_INFO,
 )
 
-from prompts import (
+from backend.prompts import (
     DECIDE_RETRIEVAL_EXAMPLES, 
     DECIDE_RETRIEVAL_SYSTEM, 
     RETRIEVAL_SYSTEM,
@@ -27,7 +27,7 @@ from prompts import (
 )
 
 
-from model import Context
+from backend.model import Context
 
 import json
 
