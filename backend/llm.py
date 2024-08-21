@@ -7,9 +7,10 @@ from langchain_core.prompts import (
 )
 from langchain_core.messages import (
     AIMessage,
-    HumanMessage
+    HumanMessage,
+    FunctionMessage
 )
-
+from typing import Literal
 import logging
 import dotenv
 from backend.config import (
@@ -28,7 +29,7 @@ from backend.prompts import (
 )
 
 
-from backend.model import Context
+from backend.model import Response
 
 import json
 
@@ -89,7 +90,7 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: s
         examples=RETRIEVAL_EXAMPLES,
     )
     system_prompt = PromptTemplate(
-        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": k, "hint": hint}
+        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": str(k), "hint": hint}
     ).format()
 
     final_prompt = ChatPromptTemplate.from_messages(
@@ -102,7 +103,7 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: s
 
     llm = ChatOpenAI(temperature=0, model='gpt-4o', model_kwargs={"response_format": {"type": "json_object"}})
     chain = final_prompt | llm
-    output = chain.invoke(append_access_purpose(user_prompt, access_purpose)).content
+    output = chain.invoke({'input': append_access_purpose(user_prompt, access_purpose)}).content
     output_dict = parse(output)
 
     logger.info(f"NoSQL Action: {output_dict.get('action')}")
@@ -110,9 +111,13 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: s
     if output_dict.get('limit'):
         logger.info(f"Limit: {output_dict.get('limit')}")
 
-    return Context(action=output_dict.get('action'), query=output_dict.get('query'), limit=output_dict.get('limit'))
+    return output_dict.get('action'), output_dict.get('query'), output_dict.get('limit')
 
-def chat(user_prompt: str, chat_history: list = [], context: Context = Context()):
+def add_function_message(context: str, name: Literal['retrival', 'validation'], chat_history: list):
+    chat_history.append(FunctionMessage(content=context, name=name))
+    return chat_history
+
+def chat(user_prompt: str, chat_history: list = []):
     chat = ChatOpenAI(temperature=0.2)
 
     prompt = ChatPromptTemplate.from_messages(
@@ -124,11 +129,11 @@ def chat(user_prompt: str, chat_history: list = [], context: Context = Context()
     )
     chain = prompt | chat
     response = chain.invoke(
-        {"input": user_prompt, "chat_history": chat_history, "context": context, "db_context": DB_CONTEXT}).content
+        {"input": user_prompt, "chat_history": chat_history, "db_context": DB_CONTEXT}).content
     
     logger.info(f"Chat Response: {response}")
 
-    return response, context
+    return response
 
 
 if __name__ == "__main__":

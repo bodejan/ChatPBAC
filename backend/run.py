@@ -1,43 +1,54 @@
 from backend.db import execute_query
-from backend.llm import decide_retrieval, write_nosql_query, chat
+from backend.llm import decide_retrieval, write_nosql_query, chat, add_function_message
 from backend.pbac import filter, verify_query
-from backend.model import Context
+from backend.model import Response
 import logging
 
 logger = logging.getLogger()
 
 def run(user_input: str, chat_history: list = [], access_purpose: str = None):
-    def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose: str = None, retry: bool = False, hint: str = ''):
-        nosql_context = write_nosql_query(user_input, access_purpose)
-        valid = nosql_context is not None and verify_query(nosql_context.query)
+    def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose: str = None, retry: bool = False, response: Response = Response()):
+        if response.query and response.error_msg is not None:
+            hint = f"The previous retrieval failed.\n{str(response.error_msg)}\nQuery:{str(response.query)}\nTry to correct the query."
+            hint = hint.replace("{","{{").replace("}","}}")
+            response.action, response.query, response.limit = write_nosql_query(user_input, access_purpose, response.limit, hint)
 
-        if not valid:
-            hint = f"The previous retrieval step failed. {nosql_context.query} is not valid."
+        response.action, response.query, response.limit = write_nosql_query(user_input, access_purpose)
+        response.valid, error = verify_query(response.query)
 
-        if valid:
-            nosql_result_context, e = execute_query(nosql_context)
+        if not response.valid:
+            response.error_msg = f"The retrieval failed due to an invalid query. Error: {error}."
+
+        if response.valid:
+            response.result, e = execute_query(response.action, response.query, response.limit)
             if e:
-                hint = f"The previous retrieval step failed. Query {nosql_context.query}\nError: {e}."
+                response.error_msg = f"The retrieval failed due to an error with the database. {e}."
             else:
-                nosql_result_filtered_context = filter(nosql_result_context, access_purpose)
-                response, context = chat(user_input, chat_history, nosql_result_filtered_context)
-                return response, context
+                result = filter(response.action, response.result, access_purpose)
+                context = f'Query:{response.action} {response.query}.\nResult: {result}.'
+                chat_history = add_function_message(context,'retrival', chat_history)
+                response.llm_response = chat(user_input, chat_history)
+                return response
             
         if retry:
-            logger.error(f"Retrieval failed. Hint: {hint}. Retrying...")
-            return run_with_retrieval(user_input, chat_history, access_purpose, False, hint)
+            logger.error(f"Retrieval failed. {response.error_msg}. Retrying...")
+            return run_with_retrieval(user_input, chat_history, access_purpose, False, response)
         else:
-            return chat(user_input, chat_history)
+            response.llm_response = chat(user_input, chat_history)
+            return response
 
     if access_purpose is None:
-        return "Please provide an access purpose.", Context()
+        return "Please provide an access purpose.", Response()
+    
+    response = Response()
+    response.retrival = decide_retrieval(user_input) == 'True'
 
-    retrive = decide_retrieval(user_input) == 'True'
-
-    if not retrive:
-        return chat(user_input, chat_history)
+    if not response.retrival:
+        response.llm_response = chat(user_input, chat_history)
+        return response
+        
     else:
-        return run_with_retrieval(user_input, chat_history, access_purpose, True)
+        return run_with_retrieval(user_input, chat_history, access_purpose, True, response)
 
 
 

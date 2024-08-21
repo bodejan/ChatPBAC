@@ -1,4 +1,4 @@
-from backend.model import VisitModel, Context
+from backend.model import VisitModel, Response
 import logging
 
 logger = logging.getLogger()
@@ -87,15 +87,15 @@ def mask_all(visits: list, access_purpose: str):
     return masked_visits, total_masked_fields
 
 
-def filter(context: Context, access_purpose: str):
-    if context.action == 'find':
-        visits = convert_all(context.result)
+def filter(action, result, access_purpose: str):
+    if action == 'find':
+        visits = convert_all(result)
         filtered_visits, total_masked_fields = mask_all(visits, access_purpose)
-        context.result = filtered_visits
-        context.masked = total_masked_fields
-        return context
+        result = filtered_visits
+        masked = total_masked_fields
+        return result
     else:
-        return context
+        return result
     
 def verify_query(query: dict) -> bool:
     """
@@ -116,10 +116,11 @@ def verify_query(query: dict) -> bool:
         ip_field = f"{field}_IP"
         if field in query_str and ip_field in ip_fields:
             if ip_field not in query_str:
-                logger.error(f"Missing IP field for {field}.")
-                return False
+                error = f"Missing IP field for {field}."
+                logger.error(error)
+                return False, error
     logger.info(f"Query verified.")
-    return True
+    return True, None
 
         
 if __name__ == "__main__":

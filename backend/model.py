@@ -1,4 +1,5 @@
 import json
+from typing import Literal
 
 
 class VisitModel:
@@ -126,13 +127,18 @@ class VisitModel:
         return json.dumps(self.to_dict(), indent=4)
 
 
-class Context:
-    def __init__(self, action = None, query = None, result = [], masked = None, limit = None):
-        self.action = action
-        self.query = query
-        self.result = result
-        self.masked = masked
-        self.limit = limit
+class Response:
+    retrival: bool = False
+    action: Literal['find', 'countDocuments', 'aggregate']
+    query: dict = None
+    limit: int
+    result: list = []
+    masked: list
+    error_msg: str = None
+    llm_response: str = 'Something went wrong. Please try again.'
+    valid: bool = False
 
-    def __repr__(self):
-        return f'Query: {self.query}, Result: {self.result}'
+    def __repr__(self) -> dict:
+        return str(self.__dict__)
+
+

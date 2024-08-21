@@ -1,11 +1,12 @@
 import gradio as gr
 from gradio import ChatMessage
-from langchain.schema import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage, FunctionMessage
 from dotenv import load_dotenv
 import os
 
 from backend.run import run
 from backend.config import GRADIO_PURPOSES
+from backend.model import Response
 
 load_dotenv()
 
@@ -33,17 +34,18 @@ with gr.Blocks(
         for m in history:
             if m.get('role') == "user":
                 history_langchain_format.append(HumanMessage(content=m.get("content")))
-            elif m.get('role') == "assistant" and m.get('metadata').get('title') != "🔍 Retrieval":
+            elif m.get('role') == "assistant" and m.get("metadata").get("title") == "🔍 Retrieval":
+                history_langchain_format.append(FunctionMessage(content=m.get("content"), name="retrieval"))
+            elif m.get('role') == "assistant":
                 history_langchain_format.append(AIMessage(content=m.get("content")))
-        print(history_langchain_format)
         history_langchain_format.append(HumanMessage(content=message))
-        response, context = run(user_input=message, chat_history=history_langchain_format, access_purpose=access_purpose)
+        response = run(user_input=message, chat_history=history_langchain_format, access_purpose=access_purpose)
         history.append(ChatMessage(role="user", content=message))
 
-        if context.action:
-            history.append(ChatMessage(role="assistant", content=f"query: <code>{context.action} {context.query}</code>\nresult: <code>{context.result}</code>", metadata={"title": f"🔍 Retrieval"}))
-        
-        history.append(ChatMessage(role="assistant", content=response))
+        if response.retrival and not response.error_msg:
+            history.append(ChatMessage(role="assistant", content=f"query: <code>{response.action} {response.query}</code>\nresult: <code>{response.result}</code>", metadata={"title": f"🔍 Retrieval"}))
+
+        history.append(ChatMessage(role="assistant", content=response.llm_response))
 
         return "", history
     

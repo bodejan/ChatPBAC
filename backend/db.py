@@ -3,7 +3,7 @@ from pymongo.server_api import ServerApi
 from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
 import os
-from backend.model import Context
+from backend.model import Response
 import logging
 
 load_dotenv()
@@ -78,22 +78,17 @@ def aggregate(pipeline: list):
         if client:
             client.close()
 
-def execute_query(context: Context, k: int = 5):
+def execute_query(action, query, k: int = 2):
     try:
-        if context.action == 'find':
-            if context.limit:
-                k = context.limit
-            result, error = find(context.query, k)
-        elif context.action == 'countDocuments':
-            result, error = count(context.query)
-        elif context.action == 'aggregate':
-            result, error = aggregate(context.query)
-        context.result = result
-        logger.info(f"Retrieval Results: {context.result}")
-        return context, error
+        if action == 'find':
+             return find(query, k)
+        elif action == 'countDocuments':
+            return count(query)
+        elif action == 'aggregate':
+            return aggregate(query)
     except Exception as e:
         logger.error(f"Error during query execution: {e}")
-        return context, str(e) 
+        return query_params, str(e) 
 
 
 
