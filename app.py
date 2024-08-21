@@ -6,7 +6,6 @@ import os
 
 from backend.run import run
 from backend.config.const import GRADIO_PURPOSES
-from backend.config.model import Response
 
 load_dotenv()
 
