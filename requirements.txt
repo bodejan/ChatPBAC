@@ -1,7 +1,7 @@
-langchain
-langchain_experimental
-langchain_openai
-pandas
-python-dotenv
-gradio
-pymongo
+langchain==0.2.14
+langchain_experimental==0.0.64
+langchain_openai==0.1.22
+pandas==2.2.2
+python-dotenv==1.0.1
+gradio==4.41.0
+pymongo==4.8.0
