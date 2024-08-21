@@ -16,7 +16,7 @@ with gr.Blocks(
 
     gr.Markdown(
         "This chatbot allows you to chat with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n" +
-        "Information on the extision of the dataset is available [here](https://github.com/bodejan/california-imr-pii).\n",
+        "Information on the extension of the dataset is available [here](https://github.com/bodejan/california-imr-pii).\n",
         "The codebase is documented in the following [GitHub repository](https://github.com/bodejan/pbac-rag).",
         line_breaks=True
     )
@@ -33,8 +33,9 @@ with gr.Blocks(
         for m in history:
             if m.get('role') == "user":
                 history_langchain_format.append(HumanMessage(content=m.get("content")))
-            elif m.get('role') == "assistant" and m.get('content') != "":
+            elif m.get('role') == "assistant" and m.get('metadata').get('title') != "🔍 Retrieval":
                 history_langchain_format.append(AIMessage(content=m.get("content")))
+        print(history_langchain_format)
         history_langchain_format.append(HumanMessage(content=message))
         response, context = run(user_input=message, chat_history=history_langchain_format, access_purpose=access_purpose)
         history.append(ChatMessage(role="user", content=message))

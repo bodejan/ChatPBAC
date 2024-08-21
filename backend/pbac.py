@@ -1,4 +1,7 @@
 from backend.model import VisitModel, Context
+import logging
+
+logger = logging.getLogger()
 
 def convert(document: dict):
     visit = VisitModel(
@@ -93,6 +96,30 @@ def filter(context: Context, access_purpose: str):
         return context
     else:
         return context
+    
+def verify_query(query: dict) -> bool:
+    """
+    Verifies that if a field exists in the query string and has a corresponding IP field 
+    in the 'ip' list, then that IP field must also be present in the query string.
+
+    Args:
+        query (dict): The query dictionary to verify.
+
+    Returns:
+        bool: True if the query passes the verification, False otherwise.
+    """
+    query_str = str(query)
+
+    _, ip_fields, non_ip_fields = VisitModel().get_keys()
+
+    for field in non_ip_fields:
+        ip_field = f"{field}_IP"
+        if field in query_str and ip_field in ip_fields:
+            if ip_field not in query_str:
+                logger.error(f"Missing IP field for {field}.")
+                return False
+    logger.info(f"Query verified.")
+    return True
 
         
 if __name__ == "__main__":

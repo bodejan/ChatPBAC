@@ -41,6 +41,8 @@ Provide a 'limit': Optional[int], default={k}.
 
 Use JSON format. 
 Use double quotation marks for keys and text values.
+
+{hint}
 """
 
 RETRIEVAL_EXAMPLES = [
@@ -93,5 +95,5 @@ If you don't know the answer, just say that you don't know and ask for more prec
 You have acces to a database. Description: {db_context}. \
 
 If provided, use retrieval results to answer questions.\
-Retrieval results: {context}
+{context}
 """

@@ -17,6 +17,7 @@ from backend.config import (
     DB_DIALECT,
     DB_COLLECTION_INFO,
 )
+from backend.pbac import verify_query
 
 from backend.prompts import (
     DECIDE_RETRIEVAL_EXAMPLES, 
@@ -68,7 +69,7 @@ def decide_retrieval(user_prompt: str):
     logger.info(f"Retrieval Decision: {response}")
     return response
 
-def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1):
+def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: str = ''):
 
     def parse(output: str):
         output_dict = json.loads(output)
@@ -88,7 +89,7 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1):
         examples=RETRIEVAL_EXAMPLES,
     )
     system_prompt = PromptTemplate(
-        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": k}
+        template=RETRIEVAL_SYSTEM, partial_variables={"dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": k, "hint": hint}
     ).format()
 
     final_prompt = ChatPromptTemplate.from_messages(
@@ -121,16 +122,13 @@ def chat(user_prompt: str, chat_history: list = [], context: Context = Context()
             ("human", "{input}"),
         ]
     )
-
     chain = prompt | chat
     response = chain.invoke(
         {"input": user_prompt, "chat_history": chat_history, "context": context, "db_context": DB_CONTEXT}).content
     
     logger.info(f"Chat Response: {response}")
-    
-    chat_history.extend([HumanMessage(content=user_prompt), AIMessage(content=response)])
 
-    return response, chat_history, context
+    return response, context
 
 
 if __name__ == "__main__":

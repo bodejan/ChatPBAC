@@ -111,6 +111,13 @@ class VisitModel:
             "PatientInsuranceNumber": self.PatientInsuranceNumber,
             "ConsultingPhysician": self.ConsultingPhysician,
         }
+    
+    def get_keys(self):
+        """Return all fields, IP fields, and non-IP fields."""
+        all = self.__dict__.keys()
+        ip_fields = [field for field in all if field.endswith('_IP')]
+        non_ip_fields = all - ip_fields
+        return all, ip_fields, non_ip_fields
 
     def __repr__(self):
         return json.dumps(self.to_dict(), indent=4)
