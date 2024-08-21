@@ -1,7 +1,9 @@
 from backend.db import execute_query
-from backend.llm import decide_retrieval, write_nosql_query, chat, add_function_message
+from backend.chat.llm import add_function_message, chat
+from backend.retrieval_decision.llm import decide_retrieval
+from backend.text2query.llm import write_nosql_query
 from backend.pbac import filter, verify_query
-from backend.model import Response
+from backend.config.model import Response
 import logging
 
 logger = logging.getLogger()

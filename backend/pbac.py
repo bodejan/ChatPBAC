@@ -1,4 +1,4 @@
-from backend.model import VisitModel, Response
+from backend.config.model import VisitModel, Response
 import logging
 
 logger = logging.getLogger()

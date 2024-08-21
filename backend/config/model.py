@@ -1,7 +1,6 @@
 import json
 from typing import Literal
 
-
 class VisitModel:
     def __init__(self, 
                  ReferenceID=None, 

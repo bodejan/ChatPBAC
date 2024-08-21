@@ -3,7 +3,7 @@ from pymongo.server_api import ServerApi
 from pymongo.errors import PyMongoError
 from dotenv import load_dotenv
 import os
-from backend.model import Response
+from backend.config.model import Response
 import logging
 
 load_dotenv()
@@ -88,7 +88,7 @@ def execute_query(action, query, k: int = 2):
             return aggregate(query)
     except Exception as e:
         logger.error(f"Error during query execution: {e}")
-        return query_params, str(e) 
+        return [], str(e) 
 
 
 
