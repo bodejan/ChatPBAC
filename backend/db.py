@@ -36,7 +36,7 @@ def find(query: dict, k: int):
     try:
         client = connect()
         db = client.get_database(os.getenv("DB_NAME"))
-        collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
+        collection = db.get_collection(os.getenv("DB_COLLECTION"))
         results = collection.find(query).limit(k)
         results = list(results)
         return results, None
@@ -52,7 +52,7 @@ def count(query: dict):
     try:
         client = connect()
         db = client.get_database(os.getenv("DB_NAME"))
-        collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
+        collection = db.get_collection(os.getenv("DB_COLLECTION"))
         count = collection.count_documents(query)
         return count, None
     except PyMongoError as e:
@@ -67,7 +67,7 @@ def aggregate(pipeline: list):
     try:
         client = connect()
         db = client.get_database(os.getenv("DB_NAME"))
-        collection = db.get_collection(os.getenv("DB_COLLECTION_NAIVE"))
+        collection = db.get_collection(os.getenv("DB_COLLECTION"))
         results = collection.aggregate(pipeline)
         results = list(results)
         return results, None
