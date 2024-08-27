@@ -15,17 +15,19 @@ with gr.Blocks(
 ) as chat_app:
 
     gr.Markdown(
-        "This chatbot allows you to chat with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n" +
-        "Information on the extension of the dataset is available [here](https://github.com/bodejan/california-imr-pii).\n",
-        "The codebase is documented in the following [GitHub repository](https://github.com/bodejan/pbac-rag).",
+        "This chatbot allows you to interact with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n"
+        "Information on the extension of the dataset is available [here](https://github.com/bodejan/california-imr-pii). "
+        "The codebase is documented in the following [GitHub repository](https://github.com/bodejan/pbac-rag).\n"
+        "Data access depends on the selected access purpose. Responses may include masked fields due to data access restrictions.",
         line_breaks=True
     )
+
 
     access_purpose = gr.Dropdown(
         choices=GRADIO_PURPOSES, interactive=True, label='Data Access Purpose', value='General-Purpose')
     
     chatbot = gr.Chatbot(type="messages", show_copy_button=True, bubble_full_width=False, likeable=True, elem_classes=["style='text-align: left;"])
-    msg = gr.Textbox()
+    msg = gr.Textbox(label="Type a message...", placeholder="How many records are in the collection?")
     clear = gr.ClearButton([msg, chatbot])
     
     def predict(message, history, access_purpose):

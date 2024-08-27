@@ -12,10 +12,12 @@ Classify the following input:
 DECIDE_RETRIEVAL_EXAMPLES = [
     {"input": "Please summarize your response", "output": "False"},
     {"input": "What is the most common age range of patients with diabetes?", "output": "True"},
-    {"input": "Retrieve Data for the following ID", "output": "True"},
+    {"input": "Retrieve Data for the following ID: M24XYZ", "output": "True"},
     {"input": "Show me the list of available data records", "output": "True"},
     {"input": "What is the capital of France?", "output": "False"},
     {"input": "Give me the data for patients with the blood type 'O+'", "output": "True"},
     {"input": "Describe the feeling of happiness", "output": "False"},
     {"input": "And how many entries are there in total?", "output": "True"},
+    {"input": "How many records are in the collection?", "output": "True"},
+    {"input": "Count the total number of entries.", "output": "True"},
 ]
