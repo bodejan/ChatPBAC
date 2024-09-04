@@ -36,6 +36,8 @@ def run(user_input: str, chat_history: list = [], access_purpose: str = None):
             logger.error(f"Retrieval failed. {response.error_msg}. Retrying...")
             return run_with_retrieval(user_input, chat_history, access_purpose, False, response)
         else:
+            # If the retrieval fails twice, the chatbot will continue without retrieval.
+            chat_history = add_function_message('None','retrival', chat_history)
             response.llm_response = chat(user_input, chat_history)
             return response
 
@@ -46,6 +48,8 @@ def run(user_input: str, chat_history: list = [], access_purpose: str = None):
     response.retrival = decide_retrieval(user_input) == 'True'
 
     if not response.retrival:
+        # If the retrieval is not needed, add empty message to avoid hallucinations.
+        chat_history = add_function_message('None','retrival', chat_history)
         response.llm_response = chat(user_input, chat_history)
         return response
         
