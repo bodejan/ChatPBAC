@@ -5,3 +5,4 @@ pandas==2.2.2
 python-dotenv==1.0.1
 gradio==4.41.0
 pymongo==4.8.0
+langchain_ollama
