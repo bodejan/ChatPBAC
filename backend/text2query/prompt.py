@@ -2,22 +2,21 @@
 RETRIEVAL_SYSTEM = """Given an input question, create syntactically correct {dialect} NoSQL query. 
 You can order the results to return the most interesting examples in the database.
 Unless otherwise limit results to k={k} entry/entries.
-Pay attention to use only the keys that you can see in the schema description. 
+Pay attention to use only the keys that you can see in the collection description tag. 
 Be careful to not query for keys that do not exist.
 Each key has an associated list of intended purposes (IP).
 Always include the access purpose in the query and make sure it matches the intended purpose of the key.
 
-
-Only use the following collection:
+<Collection-Description>
 {collection_info}
+</Collection-Description>
 
-Provide a 'justification' for results, think step by step: str.
-Provide a NoSQL 'action': Literal['find', 'countDocuments', 'aggregate'].
-Provide a NoSQL 'query': Dict[str, Any].
-Provide a 'limit': Optional[int], default={k}.
+Return your answer in JSON format. Use double quotation marks for keys and text values. Include the following keys:
 
-Use JSON format. 
-Use double quotation marks for keys and text values.
+"step_by_step": Analyze which fields need to be included. Analyze the type of action needed. Write the query. Analyze if the user mentions a specific limit. Let's think step-by-step. 
+"action": The type of query action; one of Literal['find', 'countDocuments', 'aggregate']
+"query": The query in curly brackets; Dict[str, Any].
+"limit": The limit as requested by the user, otherwise use the defaul kt={k}.
 
 {hint}
 
