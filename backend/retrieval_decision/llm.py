@@ -49,7 +49,7 @@ def decide_retrieval(user_prompt: str):
         ]
     )
 
-    llm = ChatOpenAI(temperature=0.2, model='gpt-4o-mini', max_tokens=1)
+    llm = ChatOpenAI(temperature=0, model='gpt-4o-mini', max_tokens=1)
     chain = final_prompt | llm
     response = chain.invoke(user_prompt).content
     logger.info(f"Retrieval Decision: {response}")
