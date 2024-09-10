@@ -49,6 +49,8 @@ All documents in the collection follow the same schema and have the following ke
  - ConsultingPhysician_IP: List of intended purposes (IP) for the ConsultingPhysician field.
 """
 
+KEYS = ['ReportYear', 'DiagnosisCategory', 'DiagnosisSubCategory', 'TreatmentCategory', 'TreatmentSubCategory', 'Determination', 'Type', 'AgeRange', 'PatientGender', 'Findings', 'PatientName', 'PatientAge', 'PatientPhone', 'PatientAddress', 'PatientBloodType', 'PatientSSN', 'PatientInsuranceProvider', 'PatientInsuranceNumber', 'ConsultingPhysician']
+
 GRADIO_PURPOSES = [
     ("General-Purpose", "General-Purpose"),
     ("|--- Clinical-Care", "Clinical-Care"), 

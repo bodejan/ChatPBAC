@@ -1,4 +1,6 @@
+from collections import OrderedDict
 from backend.config.model import VisitModel, Response
+from backend.config.const import KEYS
 import logging
 
 logger = logging.getLogger()
@@ -122,6 +124,49 @@ def verify_query(query: dict) -> bool:
     logger.info(f"Query verified.")
     return True, None
 
+def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
+    """
+    Rewrite the query by adding _IP fields.
+    """
+
+    relevant_keys = []
+    query_str = str(query)
+
+    for key in KEYS:
+        if key in query_str:
+            relevant_keys.append(key)
+
+    if action == 'find' or action == 'countDocuments' or action == 'findOne':
+        modified_query = OrderedDict()
+        for key in relevant_keys:
+            ip_key = f"{key}_IP"
+            modified_query[ip_key] = access_purpose
+        
+        modified_query.update(query)
+
+        return dict(modified_query)
+    
+    elif action == 'aggregate':
+        if not isinstance(query, list):
+            raise ValueError(f"For '{action}', the query should be a list of pipeline stages.")
+
+        match_stage = OrderedDict()
+        modified_pipeline = []
+
+        for key in relevant_keys:
+            ip_key = f"{key}_IP"
+            match_stage[ip_key] = access_purpose
+        
+        if match_stage:
+            modified_pipeline.append({ "$match": dict(match_stage) })  # Add the _IP fields in a $match stage
+
+        # Append the original pipeline stages
+        modified_pipeline.extend(query)
+
+        return modified_pipeline
+    
+    else:
+        raise ValueError(f"Invalid action: {action}.")
         
 if __name__ == "__main__":
     pass
