@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from backend.config.const import KEYS, KEYS_IP
+from backend.const import KEYS, KEYS_IP
 import logging
 import re
 

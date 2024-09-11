@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 
 from backend.run import run
-from backend.config.const import GRADIO_PURPOSES
+from backend.const import GRADIO_PURPOSES
 
 load_dotenv()
 

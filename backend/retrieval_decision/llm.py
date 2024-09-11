@@ -7,7 +7,7 @@ from langchain_core.prompts import (
 
 import logging
 import dotenv
-from backend.config.const import (
+from backend.const import (
     DB_CONTEXT,
 )
 
