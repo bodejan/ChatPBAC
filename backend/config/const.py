@@ -28,25 +28,6 @@ All documents in the collection follow the same schema and have the following ke
  - PatientInsuranceProvider: Insurance provider of the patient: 'CVS Health (Aetna)', 'Medicare', 'Highmark', 'UnitedHealth Group', 'Molina Healthcare', 'Centene Corporation', 'Medicaid', 'Blue Cross Blue Shield', 'Kaiser Foundation', 'Anthem Inc.', 'Independence Health Group', 'WellCare', 'Cigna Health', 'GuideWell Mutual Holding', 'Humana', 'HCSC (Health Care Service Corporation)'
  - PatientInsuranceNumber: Insurance number of the patient
  - ConsultingPhysician: Physician who consulted on the case: 'Dr. Jerry Daniels', 'Dr. Eddie Young', 'Dr. Michelle Lamb', 'Dr. Shelly Hunt', 'Dr. Alexandria Gaines', 'Dr. James Barber'
- - ReportYear_IP: List of intended purposes (IP) for the ReportYear field.
- - DiagnosisCategory_IP: List of intended purposes (IP) for the DiagnosisCategory field.
- - DiagnosisSubCategory_IP: List of intended purposes (IP) for the DiagnosisSubCategory field.
- - TreatmentCategory_IP: List of intended purposes (IP) for the TreatmentCategory field.
- - TreatmentSubCategory_IP: List of intended purposes (IP) for the TreatmentSubCategory field.
- - Determination_IP: List of intended purposes (IP) for the Determination field.
- - Type_IP: List of intended purposes (IP) for the Type field.
- - AgeRange_IP: List of intended purposes (IP) for the AgeRange field.
- - PatientGender_IP: List of intended purposes (IP) for the PatientGender field.
- - Findings_IP: List of intended purposes (IP) for the Findings field.
- - PatientName_IP: List of intended purposes (IP) for the PatientName field.
- - PatientAge_IP: List of intended purposes (IP) for the PatientAge field.
- - PatientPhone_IP: List of intended purposes (IP) for the PatientPhone field.
- - PatientAddress_IP: List of intended purposes (IP) for the PatientAddress field.
- - PatientBloodType_IP: List of intended purposes (IP) for the PatientBloodType field.
- - PatientSSN_IP: List of intended purposes (IP) for the PatientSSN field.
- - PatientInsuranceProvider_IP: List of intended purposes (IP) for the PatientInsuranceProvider field.
- - PatientInsuranceNumber_IP: List of intended purposes (IP) for the PatientInsuranceNumber field.
- - ConsultingPhysician_IP: List of intended purposes (IP) for the ConsultingPhysician field.
 """
 
 KEYS = ['ReportYear', 'DiagnosisCategory', 'DiagnosisSubCategory', 'TreatmentCategory', 'TreatmentSubCategory', 'Determination', 'Type', 'AgeRange', 'PatientGender', 'Findings',
