@@ -10,9 +10,11 @@ from backend.const import GRADIO_PURPOSES
 load_dotenv()
 
 with gr.Blocks(
-    title="PBAC-RAG Bot",
+    title="PBAC-RAG Chatbot",
     css=".content {text-align: left;}"
 ) as chat_app:
+
+    gr.Markdown("# PBAC-RAG Chatbot")
 
     gr.Markdown(
         "This chatbot allows you to interact with a PII extended version of the [California IMR Dataset](https://data.chhs.ca.gov/dataset/independent-medical-review-imr-determinations-trend).\n"
@@ -32,6 +34,17 @@ with gr.Blocks(
     clear = gr.ClearButton([msg, chatbot])
 
     def predict(message, history, access_purpose):
+        """
+        Predicts the response given a message, history, and access purpose.
+
+        Parameters:
+        - message (str): The current message to predict the response for.
+        - history (list): The list of previous messages in the conversation.
+        - access_purpose (str): The purpose for accessing the model.
+
+        Returns:
+        - tuple: A tuple containing an empty string for the textbox and the updated history list.
+        """
         history_langchain_format = []
         for m in history:
             if m.get('role') == "user":
@@ -58,6 +71,12 @@ with gr.Blocks(
         return "", history
 
     def clear_history():
+        """
+        Clears the history.
+
+        Returns:
+            tuple: A tuple containing an empty string to clear the textbox and an empty list to clear the chat history.
+        """
         return "", []
 
     access_purpose.change(clear_history, None, [msg, chatbot])
