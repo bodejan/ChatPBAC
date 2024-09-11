@@ -10,6 +10,23 @@ logger = logging.getLogger()
 
 
 class Response:
+    """
+    Represents a response object.
+
+    Attributes:
+        retrieval (bool): Indicates whether the response is a retrieval.
+        action (Literal['find', 'countDocuments', 'aggregate']): The action performed.
+        query (dict): The query used.
+        limit (int): The limit applied.
+        result (list | int): The result of the action.
+        error_msg (str): The error message, if any.
+        llm_response (str): The LLM response.
+        valid (bool): Indicates whether the query is valid.
+
+    Methods:
+        __repr__(self) -> dict: Returns a string representation of the response object.
+    """
+
     retrieval: bool
     action: Literal['find', 'countDocuments', 'aggregate']
     query: dict
@@ -23,7 +40,37 @@ class Response:
         return str(self.__dict__)
 
 
-def run_without_retrieval(user_input: str, chat_history: list = []):
+def run(user_input: str, chat_history: list = [], access_purpose: str = None) -> Response:
+    """
+    Executes the main logic of the program.
+
+    Args:
+        user_input (str): The user's input.
+        chat_history (list, optional): The chat history. Defaults to an empty list.
+        access_purpose (str, optional): The purpose of accessing the data. Defaults to None.
+
+    Returns:
+        The result of the PBAC-RAG chat interaction.
+    """
+
+    response = Response()
+    response.retrieval = decide_retrieval(user_input)
+
+    if not response.retrieval:
+        return run_without_retrieval(user_input, chat_history)
+    else:
+        return run_with_retrieval(user_input, chat_history, access_purpose)
+
+
+def run_without_retrieval(user_input: str, chat_history: list = []) -> Response:
+    """
+    Run the chatbot without retrieval.
+    Args:
+        user_input (str): The user's input.
+        chat_history (list, optional): The chat history. Defaults to [].
+    Returns:
+        Response: The chatbot response.
+    """
     # If the retrieval is not needed, add empty message to avoid hallucinations.
     response = Response()
     response.retrieval = False
@@ -32,7 +79,20 @@ def run_without_retrieval(user_input: str, chat_history: list = []):
     return response
 
 
-def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose: str = None, attempt: int = 1, response: Response = Response()):
+def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose: str = None, attempt: int = 1, response: Response = Response()) -> Response:
+    """
+    Runs the RAG with the given parameters.
+
+    Args:
+        user_input (str): The user input for the retrieval process.
+        chat_history (list, optional): The chat history. Defaults to an empty list.
+        access_purpose (str, optional): The access purpose. Defaults to None.
+        attempt (int, optional): The number of attempts. Defaults to 1.
+        response (Response, optional): The response object. Defaults to an instance of Response.
+
+    Returns:
+        Response: The response object containing the retrieval results.
+    """
     response.retrieval = True
 
     if attempt > 1:
@@ -70,77 +130,5 @@ def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose:
         run_without_retrieval(user_input, chat_history)
 
 
-def run_neo(user_input: str, chat_history: list = [], access_purpose: str = None):
-    response = Response()
-    response.retrieval = decide_retrieval(user_input)
-
-    if not response.retrieval:
-        return run_without_retrieval(user_input, chat_history)
-    else:
-        return run_with_retrieval(user_input, chat_history, access_purpose)
-
-
-def run(user_input: str, chat_history: list = [], access_purpose: str = None):
-    def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose: str = None, retry: bool = False, response: Response = Response()):
-        if response.query and response.error_msg is not None:
-            hint = f"The previous retrieval failed.\n{str(response.error_msg)}\nQuery:{str(response.query)}\nTry to correct the query."
-            hint = hint.replace("{", "{{").replace("}", "}}")
-            response.action, response.query, response.limit = write_nosql_query_no_pbac(
-                user_input, response.limit, hint)
-
-        response.action, response.query, response.limit = write_nosql_query_no_pbac(
-            user_input)
-        response.query = re_write_query(
-            response.query, response.action, access_purpose)
-        response.valid, error = verify_query(response.query)
-
-        if not response.valid:
-            response.error_msg = f"The retrieval failed due to an invalid query. Error: {error}."
-
-        if response.valid:
-            response.result, e = execute_query(
-                response.action, response.query, response.limit)
-            if e:
-                response.error_msg = f"The retrieval failed due to an error with the database. {e}."
-            else:
-                response.result = filter_results(response.action,
-                                                 response.result, access_purpose)
-                context = f'Query:{response.action} {response.query}.\nResult: {response.result}.'
-                chat_history = add_function_message(
-                    context, 'retrieval', chat_history)
-                response.llm_response = chat(user_input, chat_history)
-                return response
-
-        if retry:
-            logger.error(
-                f"Retrieval failed. {response.error_msg}. Retrying...")
-            return run_with_retrieval(user_input, chat_history, access_purpose, False, response)
-        else:
-            # If the retrieval fails twice, the chatbot will continue without retrieval.
-            chat_history = add_function_message(
-                'None', 'retrival', chat_history)
-            response.llm_response = chat(user_input, chat_history)
-            return response
-
-    if access_purpose is None:
-        return "Please provide an access purpose.", Response()
-
-    response = Response()
-    response.retrieval = decide_retrieval(user_input)
-
-    if not response.retrieval:
-        # If the retrieval is not needed, add empty message to avoid hallucinations.
-        chat_history = add_function_message('None', 'retrieval', chat_history)
-        response.llm_response = chat(user_input, chat_history)
-        return response
-
-    else:
-        return run_with_retrieval(user_input, chat_history, access_purpose, True, response)
-
-
-def test():
-    print(run('Hi', [], 'Research'))
-
-
 if __name__ == "__main__":
-    test()
+    pass

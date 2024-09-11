@@ -27,11 +27,9 @@ def filter_results(action: str, result: list, access_purpose: str) -> list:
             for key in KEYS_IP:
                 if access_purpose in doc.get(key):
                     ip_keys_include.append(key)
-            print(f"IP keys include: {ip_keys_include}")
             for key in ip_keys_include:
                 key = key.replace('_IP', '')
                 filtered_doc[key] = doc.get(key)
-            print(f"Filtered doc: {filtered_doc}")
             filtered_result.append(filtered_doc)
         return filtered_result
     else:
@@ -100,7 +98,7 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
         modified_query.update(query)
         modified_query = dict(modified_query)
 
-        logger.info(f"Modified NoSQL Query: {modified_query}")
+        logger.info(f"PBAC Query: {modified_query}")
         return modified_query
 
     elif action == 'aggregate':
@@ -122,7 +120,7 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
         # Append the original pipeline stages
         modified_pipeline.extend(query)
 
-        logger.info(f"Modified NoSQL Query: {modified_pipeline}")
+        logger.info(f"PBAC Query: {modified_pipeline}")
         return modified_pipeline
 
     else:
