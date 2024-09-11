@@ -2,8 +2,10 @@ from collections import OrderedDict
 from backend.config.model import VisitModel, Response
 from backend.config.const import KEYS
 import logging
+import re
 
 logger = logging.getLogger()
+
 
 def convert(document: dict):
     visit = VisitModel(
@@ -44,7 +46,8 @@ def convert(document: dict):
         PatientAddress_IP=document.get('PatientAddress_IP'),
         PatientBloodType_IP=document.get('PatientBloodType_IP'),
         PatientSSN_IP=document.get('PatientSSN_IP'),
-        PatientInsuranceProvider_IP=document.get('PatientInsuranceProvider_IP'),
+        PatientInsuranceProvider_IP=document.get(
+            'PatientInsuranceProvider_IP'),
         PatientInsuranceNumber_IP=document.get('PatientInsuranceNumber_IP'),
         ConsultingPhysician_IP=document.get('ConsultingPhysician_IP')
     )
@@ -55,20 +58,21 @@ def convert(document: dict):
 def convert_all(documents: list):
     return [convert(doc) for doc in documents]
 
+
 def mask(visit: VisitModel, access_purpose: str):
     masked_fields = 0
-    
+
     for key in list(vars(visit).keys()):
         # Skip specific keys that don't require masking
         if key.endswith('_IP') or key == 'ReferenceID':
             continue
-        
+
         # Retrieve the corresponding IP field for this key
         ip_field = f"{key}_IP"
-        
+
         # Get the list of intended purposes for this field
         intended_purposes = getattr(visit, ip_field, None)
-        
+
         # Check if the access_purpose is in the list of intended purposes
         if intended_purposes is not None and access_purpose not in intended_purposes:
             setattr(visit, key, 'Masked')
@@ -80,12 +84,12 @@ def mask(visit: VisitModel, access_purpose: str):
 def mask_all(visits: list, access_purpose: str):
     masked_visits = []
     total_masked_fields = 0
-    
+
     for visit in visits:
         masked_visit, masked_fields = mask(visit, access_purpose)
         masked_visits.append(masked_visit)
         total_masked_fields += masked_fields
-    
+
     return masked_visits, total_masked_fields
 
 
@@ -98,7 +102,8 @@ def filter(action, result, access_purpose: str):
         return result
     else:
         return result
-    
+
+
 def verify_query(query: dict) -> bool:
     """
     Verifies that if a field exists in the query string and has a corresponding IP field 
@@ -124,6 +129,7 @@ def verify_query(query: dict) -> bool:
     logger.info(f"Query verified.")
     return True, None
 
+
 def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
     """
     Rewrite the query by adding _IP fields.
@@ -133,7 +139,7 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
     query_str = str(query)
 
     for key in KEYS:
-        if key in query_str:
+        if re.search(r'\b' + re.escape(key) + r'\b', query_str):
             relevant_keys.append(key)
 
     if action == 'find' or action == 'countDocuments' or action == 'findOne':
@@ -141,14 +147,15 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
         for key in relevant_keys:
             ip_key = f"{key}_IP"
             modified_query[ip_key] = access_purpose
-        
+
         modified_query.update(query)
 
         return dict(modified_query)
-    
+
     elif action == 'aggregate':
         if not isinstance(query, list):
-            raise ValueError(f"For '{action}', the query should be a list of pipeline stages.")
+            raise ValueError(
+                f"For '{action}', the query should be a list of pipeline stages.")
 
         match_stage = OrderedDict()
         modified_pipeline = []
@@ -156,24 +163,19 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
         for key in relevant_keys:
             ip_key = f"{key}_IP"
             match_stage[ip_key] = access_purpose
-        
+
         if match_stage:
-            modified_pipeline.append({ "$match": dict(match_stage) })  # Add the _IP fields in a $match stage
+            # Add the _IP fields in a $match stage
+            modified_pipeline.append({"$match": dict(match_stage)})
 
         # Append the original pipeline stages
         modified_pipeline.extend(query)
 
         return modified_pipeline
-    
+
     else:
         raise ValueError(f"Invalid action: {action}.")
-        
+
+
 if __name__ == "__main__":
     pass
-    
-
-
-
-
-
-
