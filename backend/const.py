@@ -35,21 +35,6 @@ KEYS = ['ReportYear', 'DiagnosisCategory', 'DiagnosisSubCategory', 'TreatmentCat
 KEYS_IP = ['ReportYear_IP', 'DiagnosisCategory_IP', 'DiagnosisSubCategory_IP', 'TreatmentCategory_IP', 'TreatmentSubCategory_IP', 'Determination_IP', 'Type_IP', 'AgeRange_IP', 'PatientGender_IP', 'Findings_IP',
            'PatientName_IP', 'PatientAge_IP', 'PatientPhone_IP', 'PatientAddress_IP', 'PatientBloodType_IP', 'PatientSSN_IP', 'PatientInsuranceProvider_IP', 'PatientInsuranceNumber_IP', 'ConsultingPhysician_IP']
 
-GRADIO_PURPOSES = [
-    ("General-Purpose", "General-Purpose"),
-    ("|--- Clinical-Care", "Clinical-Care"),
-    ("|--- Research", "Research"),
-    ("|------- Public-Research", "Public-Research"),
-    ("|----------- Military-Research", "Military-Research"),
-    ("|----------- Non-Military-Research", "Non-Military-Research"),
-    ("|------- Private-Research", "Private-Research"),
-    ("|--- Patient-Support-Service", "Patient-Support-Service"),
-    ("|------- Billing", "Billing"),
-    ("|------- Communication", "Communication"),
-    ("|--- Third-Party", "Third-Party"),
-    ("|------- Marketing", "Marketing"),
-    ("|------- Product-Development", "Product-Development")]
-
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')

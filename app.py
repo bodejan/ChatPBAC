@@ -2,12 +2,25 @@ import gradio as gr
 from gradio import ChatMessage
 from langchain_core.messages import AIMessage, HumanMessage, FunctionMessage
 from dotenv import load_dotenv
-import os
 
 from backend.run import run
-from backend.const import GRADIO_PURPOSES
 
 load_dotenv()
+
+access_purpose_choices = [
+    ("General-Purpose", "General-Purpose"),
+    ("|--- Clinical-Care", "Clinical-Care"),
+    ("|--- Research", "Research"),
+    ("|------- Public-Research", "Public-Research"),
+    ("|----------- Military-Research", "Military-Research"),
+    ("|----------- Non-Military-Research", "Non-Military-Research"),
+    ("|------- Private-Research", "Private-Research"),
+    ("|--- Patient-Support-Service", "Patient-Support-Service"),
+    ("|------- Billing", "Billing"),
+    ("|------- Communication", "Communication"),
+    ("|--- Third-Party", "Third-Party"),
+    ("|------- Marketing", "Marketing"),
+    ("|------- Product-Development", "Product-Development")]
 
 with gr.Blocks(
     title="PBAC-RAG Chatbot",
@@ -25,7 +38,7 @@ with gr.Blocks(
     )
 
     access_purpose = gr.Dropdown(
-        choices=GRADIO_PURPOSES, interactive=True, label='Data Access Purpose', value='General-Purpose')
+        choices=access_purpose_choices, interactive=True, label='Data Access Purpose', value='General-Purpose')
 
     chatbot = gr.Chatbot(type="messages", show_copy_button=True, bubble_full_width=False,
                          likeable=True, elem_classes=["style='text-align: left;"])
