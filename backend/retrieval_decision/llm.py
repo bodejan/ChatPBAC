@@ -11,10 +11,9 @@ from backend.config.const import (
     DB_CONTEXT,
 )
 
-
 from backend.retrieval_decision.prompt import (
-    DECIDE_RETRIEVAL_EXAMPLES, 
-    DECIDE_RETRIEVAL_SYSTEM, 
+    DECIDE_RETRIEVAL_EXAMPLES,
+    DECIDE_RETRIEVAL_SYSTEM,
 )
 
 
@@ -23,8 +22,17 @@ dotenv.load_dotenv()
 logger = logging.getLogger()
 
 
-def decide_retrieval(user_prompt: str):
-    """Decide if a data retrieval request is present in the user prompt."""
+def decide_retrieval(user_prompt: str) -> bool:
+    """
+    Decide if the user prompt necessitates a retrieval action.
+
+    Args:
+        user_prompt (str): The user prompt to be evaluated.
+
+    Returns:
+        bool: The retrieval decision response, True or False.
+
+    """
 
     example_prompt = ChatPromptTemplate.from_messages(
         [
@@ -38,7 +46,8 @@ def decide_retrieval(user_prompt: str):
     )
 
     system_prompt = PromptTemplate(
-        template=DECIDE_RETRIEVAL_SYSTEM, partial_variables={"db_context": DB_CONTEXT}
+        template=DECIDE_RETRIEVAL_SYSTEM, partial_variables={
+            "db_context": DB_CONTEXT}
     ).format()
 
     final_prompt = ChatPromptTemplate.from_messages(
@@ -53,4 +62,8 @@ def decide_retrieval(user_prompt: str):
     chain = final_prompt | llm
     response = chain.invoke(user_prompt).content
     logger.info(f"Retrieval Decision: {response}")
-    return response
+
+    if response == "True":
+        return True
+    else:
+        return False

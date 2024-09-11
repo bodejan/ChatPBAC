@@ -6,7 +6,7 @@ import re
 logger = logging.getLogger()
 
 
-def filter(action, result, access_purpose: str):
+def filter_results(action: str, result: list, access_purpose: str) -> list:
     """
     Filter the result based on the given action and access purpose.
 

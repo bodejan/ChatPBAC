@@ -1,4 +1,4 @@
-from backend.pbac import re_write_query, filter
+from backend.pbac import re_write_query, filter_results
 from backend.db import execute_query
 from collections import OrderedDict
 
@@ -16,4 +16,4 @@ print(re_written)
 
 response, _ = execute_query(a, re_written, l)
 
-print(filter(a, response, ap))
+print(filter_results(a, response, ap))

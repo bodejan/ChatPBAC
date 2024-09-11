@@ -13,9 +13,7 @@ from backend.config.const import (
 )
 
 from backend.text2query.prompt import (
-    RETRIEVAL_SYSTEM,
     RETRIEVAL_SYSTEM_NO_PBAC,
-    RETRIEVAL_EXAMPLES,
     RETRIEVAL_EXAMPLES_NO_PBAC,
 )
 
@@ -26,57 +24,30 @@ dotenv.load_dotenv()
 logger = logging.getLogger()
 
 
-def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: str = ''):
+def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '') -> tuple[str, str, int]:
+    """
+    Generates a NoSQL query based on the given user prompt.
 
-    def parse(output: str):
-        output_dict = json.loads(output)
-        return output_dict
+    Args:
+        user_prompt (str): The user prompt for generating the query.
+        k (int, optional): The number of results to retrieve. Defaults to 1.
+        hint (str, optional): A hint to guide the query generation. Defaults to ''.
 
-    def append_access_purpose(user_prompt: str, access_purpose: str):
-        return f"{user_prompt} Access Purpose: '{access_purpose}'"
+    Returns:
+        tuple[str, str, int]: A tuple containing the action, query, and limit of the generated query.
 
-    example_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("human", "{input}"),
-            ("ai", "{output}"),
-        ]
-    )
-    few_shot_prompt = FewShotChatMessagePromptTemplate(
-        example_prompt=example_prompt,
-        examples=RETRIEVAL_EXAMPLES,
-    )
-    system_prompt = PromptTemplate(
-        template=RETRIEVAL_SYSTEM, partial_variables={
-            "dialect": DB_DIALECT, "collection_info": DB_COLLECTION_INFO, "k": str(k), "hint": hint}
-    ).format()
+    """
 
-    final_prompt = ChatPromptTemplate.from_messages(
-        [
-            ("system", system_prompt),
-            few_shot_prompt,
-            ("human", "{input}"),
-        ]
-    )
+    def parse(output: str) -> dict:
+        """
+        Parses the given output string and returns a dictionary.
 
-    llm = ChatOpenAI(temperature=0, model='gpt-4o',
-                     model_kwargs={"response_format": {"type": "json_object"}})
-    chain = final_prompt | llm
-    response = chain.invoke(
-        {'input': append_access_purpose(user_prompt, access_purpose)})
-    content = response.content
-    content_dict = parse(content)
+        Args:
+            output (str): The output string to be parsed.
 
-    logger.info(f"Action: {content_dict.get('action')}")
-    logger.info(f"Query: {content_dict.get('query')}")
-    if content_dict.get('limit'):
-        logger.info(f"Limit: {content_dict.get('limit')}")
-
-    return content_dict.get('action'), content_dict.get('query'), content_dict.get('limit')
-
-
-def write_nosql_query_no_pbac(user_prompt: str, access_purpose: str, k: int = 1, hint: str = ''):
-
-    def parse(output: str):
+        Returns:
+            dict: The parsed output as a dictionary.
+        """
         output_dict = json.loads(output)
         return output_dict
 
@@ -113,7 +84,6 @@ def write_nosql_query_no_pbac(user_prompt: str, access_purpose: str, k: int = 1,
     action = content_dict.get('action')
     query = content_dict.get('query')
     limit = content_dict.get('limit', None)
-    print(content_dict.get('step_by_step'))
 
     if limit is None:
         limit = k
