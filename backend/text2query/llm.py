@@ -66,8 +66,8 @@ def write_nosql_query(user_prompt: str, access_purpose: str, k: int = 1, hint: s
     content = response.content
     content_dict = parse(content)
 
-    logger.info(f"NoSQL Action: {content_dict.get('action')}")
-    logger.info(f"NoSQL Query: {content_dict.get('query')}")
+    logger.info(f"Action: {content_dict.get('action')}")
+    logger.info(f"Query: {content_dict.get('query')}")
     if content_dict.get('limit'):
         logger.info(f"Limit: {content_dict.get('limit')}")
 
@@ -113,12 +113,13 @@ def write_nosql_query_no_pbac(user_prompt: str, access_purpose: str, k: int = 1,
     action = content_dict.get('action')
     query = content_dict.get('query')
     limit = content_dict.get('limit', None)
+    print(content_dict.get('step_by_step'))
 
     if limit is None:
         limit = k
 
-    logger.info(f"NoSQL Action: {action}")
-    logger.info(f"NoSQL Query: {query}")
+    logger.info(f"Action: {action}")
+    logger.info(f"Query: {query}")
     logger.info(f"Limit: {limit}")
 
     return action, query, limit

@@ -1,113 +1,46 @@
 from collections import OrderedDict
-from backend.config.model import VisitModel, Response
-from backend.config.const import KEYS
+from backend.config.const import KEYS, KEYS_IP
 import logging
 import re
 
 logger = logging.getLogger()
 
 
-def convert(document: dict):
-    visit = VisitModel(
-        ReferenceID=document.get('ReferenceID'),
-        ReportYear=document.get('ReportYear'),
-        DiagnosisCategory=document.get('DiagnosisCategory'),
-        DiagnosisSubCategory=document.get('DiagnosisSubCategory'),
-        TreatmentCategory=document.get('TreatmentCategory'),
-        TreatmentSubCategory=document.get('TreatmentSubCategory'),
-        Determination=document.get('Determination'),
-        Type=document.get('Type'),
-        AgeRange=document.get('AgeRange'),
-        PatientGender=document.get('PatientGender'),
-        Findings=document.get('Findings'),
-        PatientName=document.get('PatientName'),
-        PatientAge=document.get('PatientAge'),
-        PatientPhone=document.get('PatientPhone'),
-        PatientAddress=document.get('PatientAddress'),
-        PatientBloodType=document.get('PatientBloodType'),
-        PatientSSN=document.get('PatientSSN'),
-        PatientInsuranceProvider=document.get('PatientInsuranceProvider'),
-        PatientInsuranceNumber=document.get('PatientInsuranceNumber'),
-        ConsultingPhysician=document.get('ConsultingPhysician'),
-        # IP fields
-        ReportYear_IP=document.get('ReportYear_IP'),
-        DiagnosisCategory_IP=document.get('DiagnosisCategory_IP'),
-        DiagnosisSubCategory_IP=document.get('DiagnosisSubCategory_IP'),
-        TreatmentCategory_IP=document.get('TreatmentCategory_IP'),
-        TreatmentSubCategory_IP=document.get('TreatmentSubCategory_IP'),
-        Determination_IP=document.get('Determination_IP'),
-        Type_IP=document.get('Type_IP'),
-        AgeRange_IP=document.get('AgeRange_IP'),
-        PatientGender_IP=document.get('PatientGender_IP'),
-        Findings_IP=document.get('Findings_IP'),
-        PatientName_IP=document.get('PatientName_IP'),
-        PatientAge_IP=document.get('PatientAge_IP'),
-        PatientPhone_IP=document.get('PatientPhone_IP'),
-        PatientAddress_IP=document.get('PatientAddress_IP'),
-        PatientBloodType_IP=document.get('PatientBloodType_IP'),
-        PatientSSN_IP=document.get('PatientSSN_IP'),
-        PatientInsuranceProvider_IP=document.get(
-            'PatientInsuranceProvider_IP'),
-        PatientInsuranceNumber_IP=document.get('PatientInsuranceNumber_IP'),
-        ConsultingPhysician_IP=document.get('ConsultingPhysician_IP')
-    )
-
-    return visit
-
-
-def convert_all(documents: list):
-    return [convert(doc) for doc in documents]
-
-
-def mask(visit: VisitModel, access_purpose: str):
-    masked_fields = 0
-
-    for key in list(vars(visit).keys()):
-        # Skip specific keys that don't require masking
-        if key.endswith('_IP') or key == 'ReferenceID':
-            continue
-
-        # Retrieve the corresponding IP field for this key
-        ip_field = f"{key}_IP"
-
-        # Get the list of intended purposes for this field
-        intended_purposes = getattr(visit, ip_field, None)
-
-        # Check if the access_purpose is in the list of intended purposes
-        if intended_purposes is not None and access_purpose not in intended_purposes:
-            setattr(visit, key, 'Masked')
-            masked_fields += 1
-
-    return visit, masked_fields
-
-
-def mask_all(visits: list, access_purpose: str):
-    masked_visits = []
-    total_masked_fields = 0
-
-    for visit in visits:
-        masked_visit, masked_fields = mask(visit, access_purpose)
-        masked_visits.append(masked_visit)
-        total_masked_fields += masked_fields
-
-    return masked_visits, total_masked_fields
-
-
 def filter(action, result, access_purpose: str):
+    """
+    Filter the result based on the given action and access purpose.
+
+    Args:
+        action (str): The action to perform.
+        result (list): The list of documents to filter.
+        access_purpose (str): The access purpose to filter by.
+
+    Returns:
+        list: The filtered result based on the action and access purpose.
+    """
+
     if action == 'find':
-        visits = convert_all(result)
-        filtered_visits, total_masked_fields = mask_all(visits, access_purpose)
-        result = filtered_visits
-        masked = total_masked_fields
-        return result
+        ip_keys_include = []
+        filtered_result = []
+        for doc in result:
+            filtered_doc = {}
+            for key in KEYS_IP:
+                if access_purpose in doc.get(key):
+                    ip_keys_include.append(key)
+            print(f"IP keys include: {ip_keys_include}")
+            for key in ip_keys_include:
+                key = key.replace('_IP', '')
+                filtered_doc[key] = doc.get(key)
+            print(f"Filtered doc: {filtered_doc}")
+            filtered_result.append(filtered_doc)
+        return filtered_result
     else:
         return result
 
 
 def verify_query(query: dict) -> bool:
     """
-    Verifies that if a field exists in the query string and has a corresponding IP field 
-    in the 'ip' list, then that IP field must also be present in the query string.
+    Verifies that a query includes fields along with their corresponding _IP fields documenting the intended purposes.
 
     Args:
         query (dict): The query dictionary to verify.
@@ -116,23 +49,38 @@ def verify_query(query: dict) -> bool:
         bool: True if the query passes the verification, False otherwise.
     """
     query_str = str(query)
+    relevant_keys = []
 
-    _, ip_fields, non_ip_fields = VisitModel().get_keys()
+    for key in KEYS:
+        if re.search(r'\b' + re.escape(key) + r'\b', query_str):
+            relevant_keys.append(key)
 
-    for field in non_ip_fields:
-        ip_field = f"{field}_IP"
-        if field in query_str and ip_field in ip_fields:
-            if ip_field not in query_str:
-                error = f"Missing IP field for {field}."
-                logger.error(error)
-                return False, error
-    logger.info(f"Query verified.")
+    for key in relevant_keys:
+        ip_key = f"{key}_IP"
+        if re.search(r'\b' + re.escape(ip_key) + r'\b', query_str):
+            pass
+        else:
+            error = f"Missing IP key for {key}."
+            logger.error(error)
+            return False, error
+
     return True, None
 
 
 def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
     """
-    Rewrite the query by adding _IP fields.
+    Rewrites the given query based on the action and access purpose.
+
+    Args:
+        query (dict): The original query.
+        action (str): The action to perform on the query. Possible values are 'find', 'countDocuments', or 'aggregate'.
+        access_purpose (str): The access purpose to be applied to the query.
+
+    Returns:
+        dict: The modified query based on the action and access purpose.
+
+    Raises:
+        ValueError: If the action is not one of the valid options or if the query is not a list for the 'aggregate' action.
     """
 
     relevant_keys = []
@@ -149,8 +97,10 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
             modified_query[ip_key] = access_purpose
 
         modified_query.update(query)
+        modified_query = dict(modified_query)
 
-        return dict(modified_query)
+        logger.info(f"Modified NoSQL Query: {modified_query}")
+        return modified_query
 
     elif action == 'aggregate':
         if not isinstance(query, list):
@@ -171,6 +121,7 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
         # Append the original pipeline stages
         modified_pipeline.extend(query)
 
+        logger.info(f"Modified NoSQL Query: {modified_pipeline}")
         return modified_pipeline
 
     else:

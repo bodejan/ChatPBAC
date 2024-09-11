@@ -49,21 +49,24 @@ All documents in the collection follow the same schema and have the following ke
  - ConsultingPhysician_IP: List of intended purposes (IP) for the ConsultingPhysician field.
 """
 
-KEYS = ['ReportYear', 'DiagnosisCategory', 'DiagnosisSubCategory', 'TreatmentCategory', 'TreatmentSubCategory', 'Determination', 'Type', 'AgeRange', 'PatientGender', 'Findings', 'PatientName', 'PatientAge', 'PatientPhone', 'PatientAddress', 'PatientBloodType', 'PatientSSN', 'PatientInsuranceProvider', 'PatientInsuranceNumber', 'ConsultingPhysician']
+KEYS = ['ReportYear', 'DiagnosisCategory', 'DiagnosisSubCategory', 'TreatmentCategory', 'TreatmentSubCategory', 'Determination', 'Type', 'AgeRange', 'PatientGender', 'Findings',
+        'PatientName', 'PatientAge', 'PatientPhone', 'PatientAddress', 'PatientBloodType', 'PatientSSN', 'PatientInsuranceProvider', 'PatientInsuranceNumber', 'ConsultingPhysician']
+KEYS_IP = ['ReportYear_IP', 'DiagnosisCategory_IP', 'DiagnosisSubCategory_IP', 'TreatmentCategory_IP', 'TreatmentSubCategory_IP', 'Determination_IP', 'Type_IP', 'AgeRange_IP', 'PatientGender_IP', 'Findings_IP',
+           'PatientName_IP', 'PatientAge_IP', 'PatientPhone_IP', 'PatientAddress_IP', 'PatientBloodType_IP', 'PatientSSN_IP', 'PatientInsuranceProvider_IP', 'PatientInsuranceNumber_IP', 'ConsultingPhysician_IP']
 
 GRADIO_PURPOSES = [
     ("General-Purpose", "General-Purpose"),
-    ("|--- Clinical-Care", "Clinical-Care"), 
-    ("|--- Research", "Research"), 
-    ("|------- Public-Research", "Public-Research"), 
-    ("|----------- Military-Research", "Military-Research"), 
-    ("|----------- Non-Military-Research", "Non-Military-Research"), 
-    ("|------- Private-Research", "Private-Research"), 
-    ("|--- Patient-Support-Service", "Patient-Support-Service"), 
-    ("|------- Billing", "Billing"), 
-    ("|------- Communication", "Communication"), 
-    ("|--- Third-Party", "Third-Party"), 
-    ("|------- Marketing", "Marketing"), 
+    ("|--- Clinical-Care", "Clinical-Care"),
+    ("|--- Research", "Research"),
+    ("|------- Public-Research", "Public-Research"),
+    ("|----------- Military-Research", "Military-Research"),
+    ("|----------- Non-Military-Research", "Non-Military-Research"),
+    ("|------- Private-Research", "Private-Research"),
+    ("|--- Patient-Support-Service", "Patient-Support-Service"),
+    ("|------- Billing", "Billing"),
+    ("|------- Communication", "Communication"),
+    ("|--- Third-Party", "Third-Party"),
+    ("|------- Marketing", "Marketing"),
     ("|------- Product-Development", "Product-Development")]
 
 

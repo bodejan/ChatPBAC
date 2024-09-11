@@ -68,6 +68,7 @@ RETRIEVAL_EXAMPLES = [
 
 RETRIEVAL_SYSTEM_NO_PBAC = """Given an input question, create syntactically correct {dialect} NoSQL query. 
 You can order the results to return the most interesting examples in the database.
+Use 'aggregate' when sorting, or skipping.
 Pay attention to use only the keys that you can see in the collection description tag. 
 Be careful to not query for keys that do not exist.
 
