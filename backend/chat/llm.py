@@ -21,24 +21,22 @@ dotenv.load_dotenv()
 
 logger = logging.getLogger()
 
-
-def add_function_message(context: str, name: str, chat_history: list) -> list:
+def format_retrieval_context(action: str, query: str, result: str) -> str:
     """
-    Adds a function message to the chat history.
+    Formats the retrieval context.
 
     Parameters:
-    - context (str): The content of the function message.
-    - name (str): The name of the function message.
-    - chat_history (list): The chat history to which the function message will be added.
+    - action (str): The action performed.
+    - query (str): The query used.
+    - result (str): The result of the action.
 
     Returns:
-    - list: The updated chat history with the added function message.
+    - str: The formatted retrieval context.
     """
-    chat_history.append(FunctionMessage(content=context, name=name))
-    return chat_history
+    return f"Use the use the following information to answer the question:\nAction: {action}\nQuery: {query}\nResult: {result}"
 
 
-def chat(user_prompt: str, chat_history: list = [], debug: bool = False) -> str:
+def chat(user_prompt: str, chat_history: list = [], retrieval_context: str ='', debug: bool = False) -> str:
     """
     Chat model using the given user prompt and chat history.
 
@@ -62,7 +60,7 @@ def chat(user_prompt: str, chat_history: list = [], debug: bool = False) -> str:
     )
     chain = prompt | chat
     response = chain.invoke(
-        {"input": user_prompt, "chat_history": chat_history, "db_context": DB_CONTEXT})
+        {"input": user_prompt, "chat_history": chat_history, 'retrieval_context': retrieval_context})
 
     content = response.content
 

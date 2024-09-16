@@ -1,5 +1,5 @@
 from backend.db import execute_query
-from backend.chat.llm import add_function_message, chat
+from backend.chat.llm import format_retrieval_context, chat
 from backend.retrieval_decision.llm import decide_retrieval
 from backend.text2query.llm import write_nosql_query_no_pbac
 from backend.pbac import filter_results, verify_query, re_write_query
@@ -74,7 +74,6 @@ def run_without_retrieval(user_input: str, chat_history: list = []) -> Response:
     # If the retrieval is not needed, add empty message to avoid hallucinations.
     response = Response()
     response.retrieval = False
-    chat_history = add_function_message('None', 'retrieval', chat_history)
     response.llm_response = chat(user_input, chat_history)
     return response
 
@@ -116,10 +115,8 @@ def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose:
         else:
             response.result = filter_results(response.action,
                                              response.result, access_purpose)
-            context = f'Query:{response.action}({response.query}).\nResult: {response.result}.'
-            chat_history = add_function_message(
-                context, 'retrieval', chat_history)
-            response.llm_response = chat(user_input, chat_history)
+            context = format_retrieval_context(response.action, response.query, response.result)
+            response.llm_response = chat(user_input, chat_history, context)
             return response
 
     if not response.valid and attempt < 3:
