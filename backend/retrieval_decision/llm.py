@@ -22,12 +22,13 @@ dotenv.load_dotenv()
 logger = logging.getLogger()
 
 
-def decide_retrieval(user_prompt: str) -> bool:
+def decide_retrieval(user_prompt: str, debug: bool = False) -> bool:
     """
     Decide if the user prompt necessitates a retrieval action.
 
     Args:
         user_prompt (str): The user prompt to be evaluated.
+        debug (bool, optional): Whether to return the llm response. Defaults to False.
 
     Returns:
         bool: The retrieval decision response, True or False.
@@ -60,10 +61,12 @@ def decide_retrieval(user_prompt: str) -> bool:
 
     llm = ChatOpenAI(temperature=0, model='gpt-4o-mini', max_tokens=1)
     chain = final_prompt | llm
-    response = chain.invoke(user_prompt).content
-    logger.info(f"Retrieval Decision: {response}")
+    response = chain.invoke(user_prompt)
+    content = response.content
+    logger.info(f"Retrieval Decision: {content}")
+    decision = content == "True"
 
-    if response == "True":
-        return True
-    else:
-        return False
+    if debug:
+        return decision, response
+
+    return decision

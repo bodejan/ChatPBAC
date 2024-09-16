@@ -24,7 +24,7 @@ dotenv.load_dotenv()
 logger = logging.getLogger()
 
 
-def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '') -> tuple[str, str, int]:
+def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '', debug: bool = False) -> tuple[str, str, int]:
     """
     Generates a NoSQL query based on the given user prompt.
 
@@ -32,6 +32,7 @@ def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '') -> t
         user_prompt (str): The user prompt for generating the query.
         k (int, optional): The number of results to retrieve. Defaults to 1.
         hint (str, optional): A hint to guide the query generation. Defaults to ''.
+        debug (bool, optional): Whether to return the llm response. Defaults to False.
 
     Returns:
         tuple[str, str, int]: A tuple containing the action, query, and limit of the generated query.
@@ -91,5 +92,8 @@ def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '') -> t
     logger.info(f"Action: {action}")
     logger.info(f"Query: {query}")
     logger.info(f"Limit: {limit}")
+
+    if debug:
+        return action, query, limit, response
 
     return action, query, limit

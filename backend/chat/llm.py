@@ -38,13 +38,14 @@ def add_function_message(context: str, name: str, chat_history: list) -> list:
     return chat_history
 
 
-def chat(user_prompt: str, chat_history: list = []) -> str:
+def chat(user_prompt: str, chat_history: list = [], debug: bool = False) -> str:
     """
     Chat model using the given user prompt and chat history.
 
     Args:
         user_prompt (str): The user prompt for the chat.
         chat_history (list, optional): The chat history. Defaults to an empty list.
+        debug (bool, optional): Whether to return the llm response. Defaults to False.
 
     Returns:
         str: The response from the language model.
@@ -61,8 +62,13 @@ def chat(user_prompt: str, chat_history: list = []) -> str:
     )
     chain = prompt | chat
     response = chain.invoke(
-        {"input": user_prompt, "chat_history": chat_history, "db_context": DB_CONTEXT}).content
+        {"input": user_prompt, "chat_history": chat_history, "db_context": DB_CONTEXT})
 
-    logger.info(f"Chat Response: {response}")
+    content = response.content
 
-    return response
+    logger.info(f"Chat Response: {content}")
+
+    if debug:
+        return content, response
+
+    return content
