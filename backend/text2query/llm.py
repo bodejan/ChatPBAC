@@ -75,7 +75,7 @@ def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '', debu
         ]
     )
 
-    llm = ChatOpenAI(temperature=0, model='gpt-4o',
+    llm = ChatOpenAI(temperature=0.4, model='gpt-4o',
                      model_kwargs={"response_format": {"type": "json_object"}})
     chain = final_prompt | llm
     response = chain.invoke({'input': user_prompt})
@@ -85,6 +85,7 @@ def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '', debu
     action = content_dict.get('action')
     query = content_dict.get('query')
     limit = content_dict.get('limit', None)
+    step_by_step = content_dict.get('step_by_step')
 
     if limit is None:
         limit = k
@@ -92,6 +93,7 @@ def write_nosql_query_no_pbac(user_prompt: str, k: int = 1, hint: str = '', debu
     logger.info(f"Action: {action}")
     logger.info(f"Query: {query}")
     logger.info(f"Limit: {limit}")
+    logger.info(f"Step-by-step: {step_by_step}")
 
     if debug:
         return action, query, limit, response

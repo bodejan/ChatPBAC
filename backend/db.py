@@ -99,7 +99,7 @@ def count(query: dict) -> tuple[int, str | None]:
         return count, None
     except PyMongoError as e:
         logger.error(f"Error during count operation: {e}")
-        return [], str(e)
+        return '', str(e)
     finally:
         if client:
             client.close()

@@ -49,7 +49,7 @@ def chat(user_prompt: str, chat_history: list = [], retrieval_context: str ='', 
         str: The response from the language model.
     """
     pass
-    chat = ChatOpenAI(temperature=0.2)
+    chat = ChatOpenAI(temperature=0.3)
 
     prompt = ChatPromptTemplate.from_messages(
         [
