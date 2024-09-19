@@ -1,6 +1,5 @@
 # Custom
-medical_database.db
-ex_ante/
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
