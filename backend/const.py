@@ -36,5 +36,5 @@ KEYS_IP = ['ReportYear_IP', 'DiagnosisCategory_IP', 'DiagnosisSubCategory_IP', '
            'PatientName_IP', 'PatientAge_IP', 'PatientPhone_IP', 'PatientAddress_IP', 'PatientBloodType_IP', 'PatientSSN_IP', 'PatientInsuranceProvider_IP', 'PatientInsuranceNumber_IP', 'ConsultingPhysician_IP']
 
 
-logging.basicConfig(level=logging.WARNING,
+logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
