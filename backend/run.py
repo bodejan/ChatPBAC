@@ -2,7 +2,7 @@ from backend.db import execute_query
 from backend.chat.llm import format_retrieval_context, chat
 from backend.retrieval_decision.llm import decide_retrieval
 from backend.query_generation.llm import write_nosql_query_no_pbac
-from backend.pbac import filter_results, verify_query, re_write_query
+from backend.pbac import filter_results, validate_query, re_write_query
 import logging
 from typing import Literal
 
@@ -104,7 +104,7 @@ def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose:
 
     response.query = re_write_query(
         response.query, response.action, access_purpose)
-    response.valid, response.error_msg = verify_query(response.query)
+    response.valid, response.error_msg = validate_query(response.query)
 
     if response.valid:
         response.result, e = execute_query(

@@ -36,7 +36,7 @@ def filter_results(action: str, result: list, access_purpose: str) -> list:
         return result
 
 
-def verify_query(query: dict) -> tuple[bool, str | None]:
+def validate_query(query: dict) -> tuple[bool, str | None]:
     """
     Verifies that a query includes fields along with their corresponding _IP fields documenting the intended purposes.
 
