@@ -1,17 +1,10 @@
-from typing import Literal
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import (
     ChatPromptTemplate,
     MessagesPlaceholder
 )
-from langchain_core.messages import (
-    FunctionMessage
-)
 import logging
 import dotenv
-from pbag_rag.const import (
-    DB_CONTEXT,
-)
 from pbag_rag.chat.prompt import (
     CHAT_SYSTEM
 )
