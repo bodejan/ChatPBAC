@@ -6,8 +6,20 @@ sdk_version: 4.41.0
 ---
 # Master Thesis: PBAC in retrieval augmented LLMs
 
+![Demo Video](assets/demo.gif)
+
 ## Description
 This repository contains the source code for a exemplary Purpose-based Access Control (PBAC)-RAG application. The application was developed in connection 
+
+
+
+## Project Structure
+
+
+## Architecture
+
+![Flow Chart](assets/flowchart.png)
+
 
 ## Prerequisites
 
