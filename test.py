@@ -1,19 +1,22 @@
-from backend.pbac import re_write_query, filter_results
-from backend.db import execute_query
-from collections import OrderedDict
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
 
 import time
-from backend.text2query.llm import write_nosql_query, write_nosql_query_no_pbac
+
+import os
 
 start = time.time()
-ap = "Third-Party"
-a, q, l = write_nosql_query_no_pbac(
-    "Provide the first two records", ap, 2)
-print(time.time() - start)
 
-re_written = re_write_query(q, a, ap)
-print(re_written)
+client = MongoClient(os.getenv("DB_URI"), server_api=ServerApi('1'))
+query = {}
+k = 1
+db = client.get_database(os.getenv("DB_NAME"))
+collection = db.get_collection(os.getenv("DB_COLLECTION"))
+print(f"Before execution: {time.time() - start}")
+results = collection.find(query).limit(k)
+print(list(results))
+print(f"Final: {time.time() - start}")
 
-response, _ = execute_query(a, re_written, l)
+client.close()
 
-print(filter_results(a, response, ap))
+
