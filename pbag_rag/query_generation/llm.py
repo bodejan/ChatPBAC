@@ -7,12 +7,12 @@ from langchain_core.prompts import (
 
 import logging
 import dotenv
-from backend.const import (
+from pbag_rag.const import (
     DB_DIALECT,
     DB_COLLECTION_INFO,
 )
 
-from backend.query_generation.prompt import (
+from pbag_rag.query_generation.prompt import (
     RETRIEVAL_SYSTEM_NO_PBAC,
     RETRIEVAL_EXAMPLES_NO_PBAC,
 )

@@ -6,6 +6,9 @@ sdk_version: 4.41.0
 ---
 # Master Thesis: PBAC in retrieval augmented LLMs
 
+## Description
+
+
 
 ## Prerequisites
 
@@ -41,4 +44,4 @@ Python 3.9 or higher
     python ui.py
     ```
 
-$^1$ To change the LLM inference provider install the langchain-*provider* package and adjust the llm declarations in [1](backend/query_generation/llm.py#78), [2](backend/retrieval_decision/llm.py#L62), and [3](backend/chat/llm.py#52).
+$^1$ To change the LLM inference provider install the langchain-*provider* package and adjust the llm declarations in [1](pbag_rag/query_generation/llm.py#78), [2](pbag_rag/retrieval_decision/llm.py#L62), and [3](pbag_rag/chat/llm.py#52).

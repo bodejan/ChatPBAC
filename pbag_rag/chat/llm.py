@@ -9,10 +9,10 @@ from langchain_core.messages import (
 )
 import logging
 import dotenv
-from backend.const import (
+from pbag_rag.const import (
     DB_CONTEXT,
 )
-from backend.chat.prompt import (
+from pbag_rag.chat.prompt import (
     CHAT_SYSTEM
 )
 
