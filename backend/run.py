@@ -1,7 +1,7 @@
 from backend.db import execute_query
 from backend.chat.llm import format_retrieval_context, chat
 from backend.retrieval_decision.llm import decide_retrieval
-from backend.text2query.llm import write_nosql_query_no_pbac
+from backend.query_generation.llm import write_nosql_query_no_pbac
 from backend.pbac import filter_results, verify_query, re_write_query
 import logging
 from typing import Literal

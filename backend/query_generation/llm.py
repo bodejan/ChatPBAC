@@ -12,7 +12,7 @@ from backend.const import (
     DB_COLLECTION_INFO,
 )
 
-from backend.text2query.prompt import (
+from backend.query_generation.prompt import (
     RETRIEVAL_SYSTEM_NO_PBAC,
     RETRIEVAL_EXAMPLES_NO_PBAC,
 )
