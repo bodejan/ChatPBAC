@@ -9,16 +9,41 @@ sdk_version: 4.41.0
 ![Demo Video](assets/demo.gif)
 
 ## Description
-This repository contains the source code for a exemplary Purpose-based Access Control (PBAC)-RAG application. The application was developed in connection 
+This repository contains the source code for a exemplary Purpose-based Access Control (PBAC)-RAG application. 
+The application was developed as a Proof of Concept (PoC) to illustrate the prosed architecture for a PBAC-RAG system.  
 
+![Flow Chart](assets/flowchart.png)
 
 
 ## Project Structure
-
-
-## Architecture
-
-![Flow Chart](assets/flowchart.png)
+```plaintext
+project-root/
+├── assets/                          # Directory for media assets
+│   ├── demo.gif                     # Demo GIF showcasing functionality
+│   └── flowchart.png                # Flowchart illustrating workflow architectural components
+├── pbag_rag/                        # Main project source directory
+│   ├── chat/                        # Chat module
+│   │   ├── llm.py                   # Declaration of chat LLM
+│   │   └── prompt.py                # Prompt template for chat LLM
+│   ├── query_generation/            # Query generation module
+│   │   ├── llm.py                   # Declaration of query generation LLM
+│   │   └── prompt.py                # Prompt template and few-shot examples for query generation LLM 
+│   ├── retrieval_decision/          # Retrieval decision module
+│   │   ├── llm.py                   # Declaration of retrieval decision LLM
+│   │   └── prompt.py                # Prompt template and few-shot examples for retrieval decision LLM
+│   ├── const.py                     # Constants and configuration settings
+│   ├── db.py                        # Database interaction utilities
+│   ├── pbac.py                      # PBAC logic including validation
+│   └── run.py                       # Main script to execute the PBAC-RAG application, i.e., the backend
+├── .env.example                     # Example environment file template
+├── .gitignore                       # Git ignore file to exclude unnecessary files
+├── evaluation_results.jsonl         # JSONL file storing evaluation results
+├── evaluation.ipynb                 # Jupyter notebook for evaluating model or system
+├── install.py                       # Installation script for setting up dependencies
+├── LICENSE                          # License file for the project
+├── README.md                        # Main documentation and introduction to the project
+└── requirements.txt                 # List of Python dependencies for the project
+```
 
 
 ## Prerequisites
