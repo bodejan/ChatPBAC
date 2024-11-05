@@ -38,7 +38,7 @@ project-root/
 ├── .env.example                     # Example environment file template
 ├── .gitignore                       # Git ignore file to exclude unnecessary files
 ├── evaluation_results.jsonl         # JSONL file storing evaluation results
-├── evaluation.ipynb                 # Jupyter notebook for evaluating model or system
+├── evaluation.ipynb                 # Jupyter notebook for evaluating the system
 ├── install.py                       # Installation script for setting up dependencies
 ├── LICENSE                          # License file for the project
 ├── README.md                        # Main documentation and introduction to the project
