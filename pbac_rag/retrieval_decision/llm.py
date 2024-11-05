@@ -7,11 +7,11 @@ from langchain_core.prompts import (
 
 import logging
 import dotenv
-from pbag_rag.const import (
+from pbac_rag.const import (
     DB_CONTEXT,
 )
 
-from pbag_rag.retrieval_decision.prompt import (
+from pbac_rag.retrieval_decision.prompt import (
     DECIDE_RETRIEVAL_EXAMPLES,
     DECIDE_RETRIEVAL_SYSTEM,
 )

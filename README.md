@@ -21,7 +21,7 @@ project-root/
 ├── assets/                          # Directory for media assets
 │   ├── demo.gif                     # Demo GIF showcasing functionality
 │   └── flowchart.png                # Flowchart illustrating workflow architectural components
-├── pbag_rag/                        # Main project source directory
+├── pbac_rag/                        # Main project source directory
 │   ├── chat/                        # Chat module
 │   │   ├── llm.py                   # Declaration of chat LLM
 │   │   └── prompt.py                # Prompt template for chat LLM
@@ -80,4 +80,4 @@ Python 3.9 or higher
     python ui.py
     ```
 
-$^1$ To change the LLM inference provider install the langchain-*provider* package and adjust the llm declarations in [1](pbag_rag/query_generation/llm.py#78), [2](pbag_rag/retrieval_decision/llm.py#L62), and [3](pbag_rag/chat/llm.py#52).
+$^1$ To change the LLM inference provider install the langchain-*provider* package and adjust the llm declarations in [1](pbac_rag/query_generation/llm.py#78), [2](pbac_rag/retrieval_decision/llm.py#L62), and [3](pbac_rag/chat/llm.py#52).

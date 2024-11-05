@@ -5,7 +5,7 @@ from langchain_core.prompts import (
 )
 import logging
 import dotenv
-from pbag_rag.chat.prompt import (
+from pbac_rag.chat.prompt import (
     CHAT_SYSTEM
 )
 
