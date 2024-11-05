@@ -81,3 +81,7 @@ Python 3.9 or higher
     ```
 
 $^1$ To change the LLM inference provider install the langchain-*provider* package and adjust the llm declarations in [1](pbag_rag/query_generation/llm.py#78), [2](pbag_rag/retrieval_decision/llm.py#L62), and [3](pbag_rag/chat/llm.py#52).
+
+## Note
+
+Evaluation results are provided on the [evaluation branch](https://github.com/bodejan/pbac-rag/tree/evaluation).
