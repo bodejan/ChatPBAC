@@ -3,7 +3,7 @@ from gradio import ChatMessage
 from langchain_core.messages import AIMessage, HumanMessage, FunctionMessage
 from dotenv import load_dotenv
 
-from pbag_rag.run import run
+from pbac_rag.run import run
 
 load_dotenv()
 
