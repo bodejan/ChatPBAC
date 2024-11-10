@@ -14,7 +14,7 @@ dotenv.load_dotenv()
 
 logger = logging.getLogger()
 
-def format_retrieval_context(action: str, query: str, result: str) -> str:
+def format_retrieval_context(action: str, query: str, result: str, limit: int = 0) -> str:
     """
     Formats the retrieval context.
 
@@ -22,11 +22,16 @@ def format_retrieval_context(action: str, query: str, result: str) -> str:
     - action (str): The action performed.
     - query (str): The query used.
     - result (str): The result of the action.
+    - limit (optional)(int): The limit applied.
 
     Returns:
     - str: The formatted retrieval context.
     """
-    return f"Use the use the following information to answer the question:\nAction: {action}\nQuery: {query}\nResult: {result}"
+
+    if action == 'find':
+        return f"Use the use the following information to answer the question:\ndb.collection.{action}({query}).limit({limit})\nResult: {result}"
+    else:
+       return f"Use the use the following information to answer the question:\ndb.collection.{action}({query})\nResult: {result}"
 
 
 def chat(user_prompt: str, chat_history: list = [], retrieval_context: str ='', debug: bool = False) -> str:

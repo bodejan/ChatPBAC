@@ -76,7 +76,7 @@ with gr.Blocks(
 
         if response.retrieval and not response.error_msg:
             history.append(ChatMessage(
-                role="assistant", content=f"query: <code>{response.action} {response.query}</code>\nresult: <code>{response.result}</code>", metadata={"title": f"🔍 Retrieval"}))
+                role="assistant", content=f"query: <code>db.collection.{response.action}({response.query})</code>\nresult: <code>{response.result}</code>", metadata={"title": f"🔍 Retrieval"}))
 
         history.append(ChatMessage(role="assistant",
                        content=response.llm_response))
