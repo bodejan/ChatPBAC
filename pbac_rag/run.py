@@ -115,7 +115,7 @@ def run_with_retrieval(user_input: str, chat_history: list = [], access_purpose:
         else:
             response.result = filter_results(response.action,
                                              response.result, access_purpose)
-            context = format_retrieval_context(response.action, response.query, response.result)
+            context = format_retrieval_context(response.action, response.query, response.result, response.limit)
             response.llm_response = chat(user_input, chat_history, context)
             return response
 

@@ -107,15 +107,21 @@ def re_write_query(query: dict, action: str, access_purpose: str) -> dict:
                 f"For '{action}', the query should be a list of pipeline stages.")
 
         match_stage = OrderedDict()
+        project_stage = OrderedDict()
         modified_pipeline = []
 
         for key in relevant_keys:
             ip_key = f"{key}_IP"
             match_stage[ip_key] = access_purpose
+            project_stage[key] = 1
 
         if match_stage:
             # Add the _IP fields in a $match stage
             modified_pipeline.append({"$match": dict(match_stage)})
+        
+        if project_stage:
+            # Add the original fields in a $project stage
+            modified_pipeline.append({"$project": dict(project_stage)})
 
         # Append the original pipeline stages
         modified_pipeline.extend(query)
